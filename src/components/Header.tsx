@@ -1,8 +1,10 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button'; // I will create this component next
+import { Button } from '@/components/ui/Button';
 import { Menu } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = () => {
+  const {user, logout, loginWithTwitter} = useAuth()
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
@@ -21,7 +23,11 @@ const Header = () => {
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <Button>Sign In</Button>
+          {user ? (
+            <Button onClick={logout}>Logout</Button>
+          ) : (
+            <Button onClick={loginWithTwitter}>Sign In with X</Button>
+          )}
         </div>
       </div>
     </header>

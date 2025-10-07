@@ -1,15 +1,18 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useEvents } from './context';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import EventCard from './components/EventCard';
 import FilterBar from './components/FilterBar';
+import Map from '@/components/Map';
+import { Button } from '@/components/ui/Button';
 import { IEvent } from './model';
 
 const EventsPageContent = () => {
-  const { events, loading, error } = useEvents();
+  const { events, loading, error, loadMore, hasMore } = useEvents();
+  const [showMap, setShowMap] = useState(false);
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -23,6 +26,12 @@ const EventsPageContent = () => {
       </section>
 
       <FilterBar />
+
+      <Button onClick={() => setShowMap(!showMap)} className="mb-4">
+        {showMap ? 'Hide Map' : 'Show Map'}
+      </Button>
+
+      {showMap && <Map events={events} />}
 
       {loading && <p className="text-center">Loading events...</p>}
       {error && <p className="text-center text-red-500">Error: {error}</p>}
@@ -40,13 +49,18 @@ const EventsPageContent = () => {
           )}
         </div>
       )}
+      {!loading && hasMore && (
+        <div className="text-center mt-8">
+          <Button onClick={loadMore} disabled={loading}>
+            Load More
+          </Button>
+        </div>
+      )}
     </main>
   );
 };
 
 const EventsPage = () => {
-  // This is the top-level component for the page.
-  // It ensures that the context provider wraps everything that needs access to the event state.
   return (
     <div className="flex flex-col min-h-screen">
       <Header />

@@ -16,10 +16,17 @@ const FilterBar = () => {
     setFilters({ category: value === 'all' ? '' : (value as Category) });
   };
 
+  const handleDateFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters({ dateFrom: e.target.value });
+  };
+
+  const handleDateToChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters({ dateTo: e.target.value });
+  };
+
   return (
     <div className="p-4 bg-card border rounded-lg mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* The search input is a placeholder for now, as its logic is not yet in the context */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Input
           placeholder="Search by event title..."
           className="md:col-span-1"
@@ -50,6 +57,14 @@ const FilterBar = () => {
             ))}
           </SelectContent>
         </Select>
+        <div className="flex flex-col">
+          <label htmlFor="dateFrom" className="text-sm font-medium mb-1">From Date</label>
+          <Input id="dateFrom" type="date" value={filters.dateFrom} onChange={handleDateFromChange} />
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="dateTo" className="text-sm font-medium mb-1">To Date</label>
+          <Input id="dateTo" type="date" value={filters.dateTo} onChange={handleDateToChange} />
+        </div>
       </div>
     </div>
   );

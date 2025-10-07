@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { IEventInput } from './model';
-import * as api from '@/lib/api';
+import { apiClient } from '@/lib/api';
 
 // Define the shape of the context value
 interface ISubmitContext {
@@ -25,7 +25,7 @@ export const SubmitProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     setSuccess(false);
     try {
-      await api.createEvent(eventData);
+      await apiClient.post('/events', eventData);
       setSuccess(true);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
