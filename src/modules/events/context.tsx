@@ -45,7 +45,6 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     dateTo: "",
   });
   const [skip, setSkip] = useState(0);
-  const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const limit = 10;
 
@@ -71,7 +70,6 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
           total: number;
         }>("/events", { params: apiFilters });
         setEvents((prev) => (append ? [...prev, ...data.events] : data.events));
-        setTotal(data.total);
         setHasMore(currentSkip + data.events.length < data.total);
       } catch (err) {
         const errorMessage =
@@ -88,7 +86,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     fetchEvents(filters, 0);
     setSkip(0);
-  }, [filters]);
+  }, [filters, fetchEvents]);
 
   const handleSetFilters = useCallback(
     (newFilters: Partial<IEventFilters>) => {

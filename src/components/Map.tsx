@@ -21,7 +21,7 @@ const defaultCenter = {
 export default function Map({ events, center = defaultCenter }: MapProps) {
   return (
     <LoadScript
-    // googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}
+      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}
     >
       <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={8}>
         {events.map(
