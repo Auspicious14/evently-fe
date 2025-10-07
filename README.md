@@ -1,6 +1,6 @@
-# TechEventsNG
+# Evently
 
-TechEventsNG is a web application designed to help users discover tech events happening across Nigeria. It provides a centralized platform for finding, filtering, and viewing event details, including an interactive map to visualize event locations.
+Evently is a web application designed to help users discover tech events happening across Nigeria. It provides a centralized platform for finding, filtering, and viewing event details, including an interactive map to visualize event locations.
 
 ## Features
 
