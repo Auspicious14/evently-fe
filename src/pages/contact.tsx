@@ -20,10 +20,10 @@ const ContactPage = () => {
           </p>
           <div className="text-center">
             <p className="mb-2">
-              <strong>Email:</strong> <a href="mailto:uthmanabdulganiyu2019@gmail.com" className="text-blue-500 hover:underline">uthmanabdulganiyu2019@gmail.com</a>
+              <strong>Email:</strong> <a href="mailto:info@eventnaija.com" className="text-blue-500 hover:underline">info@eventnaija.com</a>
             </p>
             <p>
-              <strong>Twitter/X:</strong> <a href="https://twitter.com/_auspy_" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">@EventNaija</a>
+              <strong>Twitter/X:</strong> <a href="https://twitter.com/your-community-handle" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">@EventNaija</a>
             </p>
           </div>
         </section>

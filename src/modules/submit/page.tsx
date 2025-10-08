@@ -4,20 +4,24 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import EventForm from './components/EventForm';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/router';
 
 const SubmitPageContent = () => {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   React.useEffect(() => {
-    if (status === 'loading') return; // Do nothing while loading
-    if (!session) router.push('/login'); // Redirect if not authenticated
-  }, [session, status, router]);
+    if (loading) return; // Do nothing while loading
+    if (!user) router.push('/login'); // Redirect if not authenticated
+  }, [user, loading, router]);
 
-  if (status === 'loading' || !session) {
-    return <div>Loading...</div>; // Or a spinner
+  if (loading || !user) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   return (

@@ -4,7 +4,8 @@ import { Menu } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const Header = () => {
-  const {user, logout, loginWithTwitter} = useAuth()
+  const { user, logout, loginWithTwitter } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
