@@ -8,22 +8,22 @@ const ContactPage = () => {
       <main className="flex-grow container mx-auto px-4 py-8">
         <section className="text-center my-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tighter">
-            Contact Us
+            Contact the Creator
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            We'd love to hear from you.
+            I'd love to hear from you.
           </p>
         </section>
         <section className="max-w-3xl mx-auto">
           <p className="mb-4 text-center">
-            For any inquiries, feedback, or suggestions, please feel free to reach out to us. You can connect with us through our social media channels or send us an email.
+            For any inquiries, feedback, or suggestions, please feel free to reach out to me. You can connect with me through our social media channels or send me an email.
           </p>
           <div className="text-center">
             <p className="mb-2">
-              <strong>Email:</strong> <a href="mailto:info@eventnaija.com" className="text-blue-500 hover:underline">info@eventnaija.com</a>
+              <strong>Email:</strong> <a href="mailto:uthmanabdulganiyu2019@gmail.com" className="text-blue-500 hover:underline">uthmanabdulganiyu2019@gmail.com</a>
             </p>
             <p>
-              <strong>Twitter/X:</strong> <a href="https://twitter.com/your-community-handle" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">@EventNaija</a>
+              <strong>Twitter/X:</strong> <a href="https://twitter.com/_auspy_" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">@Auspicious</a>
             </p>
           </div>
         </section>
