@@ -4,8 +4,22 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import EventForm from './components/EventForm';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 const SubmitPageContent = () => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (status === 'loading') return; // Do nothing while loading
+    if (!session) router.push('/login'); // Redirect if not authenticated
+  }, [session, status, router]);
+
+  if (status === 'loading' || !session) {
+    return <div>Loading...</div>; // Or a spinner
+  }
+
   return (
     <main className="container mx-auto px-4 py-8">
       <section className="text-center my-12">

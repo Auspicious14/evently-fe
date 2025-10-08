@@ -1,6 +1,6 @@
-# Evently
+# EventNaija
 
-Evently is a web application designed to help users discover tech events happening across Nigeria. It provides a centralized platform for finding, filtering, and viewing event details, including an interactive map to visualize event locations.
+EventNaija is a web application designed to help users discover tech events happening across Nigeria. It provides a centralized platform for finding, filtering, and viewing event details, including an interactive map to visualize event locations.
 
 ## Features
 
@@ -32,8 +32,8 @@ To get a local copy up and running, follow these simple steps.
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/your-username/techevents-ng.git
-    cd techevents-ng
+    git clone https://github.com/your-username/EventNaija.git
+    cd EventNaija
     ```
 
 2.  **Install NPM packages:**
