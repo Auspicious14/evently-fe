@@ -1,24 +1,22 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import{apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api';
+import { jwtDecode } from 'jwt-decode';
 
 interface IUser {
   id: string;
   username: string;
-  email: string;
-  // Add other user fields as per backend
+  role: string;
 }
 
 interface IAuthContext {
   user: IUser | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
   loginWithTwitter: () => void;
+  handleAuthentication: (token: string) => void;
   logout: () => void;
-  getUserProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<IAuthContext | null>(null);
@@ -31,65 +29,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      getUserProfile();
-    } else {
-      setLoading(false);
+      try {
+        const decodedUser = jwtDecode<IUser>(token);
+        setUser(decodedUser);
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      } catch (e) {
+        console.error("Invalid token:", e);
+        localStorage.removeItem('authToken');
+      }
     }
+    setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await apiClient.post<{ access_token: string }>("/auth/login", { email, password });
-      localStorage.setItem('authToken', data.access_token);
-      await getUserProfile();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const register = async (username: string, email: string, password: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await apiClient.post<{ access_token: string }>("/auth/register", { username, email, password });
-      localStorage.setItem('authToken', data.access_token);
-      await getUserProfile();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loginWithTwitter = () => {
-    window.location.href = `${apiClient.defaults.baseURL}/auth/twitter`;
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    window.location.href = `${backendUrl}/auth/twitter`;
   };
 
-  const getUserProfile = async () => {
-    setLoading(true);
-    setError(null);
+  const handleAuthentication = (token: string) => {
     try {
-      const { data } = await apiClient.get<IUser>("/users/me");
-      setUser(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch profile');
-      localStorage.removeItem('authToken');
-    } finally {
-      setLoading(false);
+      const decodedUser = jwtDecode<IUser>(token);
+      localStorage.setItem('authToken', token);
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser(decodedUser);
+    } catch (e) {
+      console.error("Failed to decode token:", e);
+      setError("Received an invalid token from the server.");
     }
   };
 
   const logout = () => {
     localStorage.removeItem('authToken');
+    delete apiClient.defaults.headers.common['Authorization'];
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, loginWithTwitter, logout, getUserProfile }}>
+    <AuthContext.Provider value={{ user, loading, error, loginWithTwitter, handleAuthentication, logout }}>
       {children}
     </AuthContext.Provider>
   );

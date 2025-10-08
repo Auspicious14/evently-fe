@@ -4,8 +4,26 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import EventForm from './components/EventForm';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/router';
 
 const SubmitPageContent = () => {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (loading) return; // Do nothing while loading
+    if (!user) router.push('/login'); // Redirect if not authenticated
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <main className="container mx-auto px-4 py-8">
       <section className="text-center my-12">

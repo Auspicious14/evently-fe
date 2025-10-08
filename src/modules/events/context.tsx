@@ -12,6 +12,7 @@ import { IEvent, Category } from "./model";
 import { apiClient } from "@/lib/api";
 
 interface IEventFilters {
+  search: string;
   location: string;
   category: Category | "";
   dateFrom: string;
@@ -39,6 +40,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<IEventFilters>({
+    search: "",
     location: "",
     category: "",
     dateFrom: "",
@@ -58,6 +60,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       try {
         const apiFilters = {
+          ...(currentFilters.search && { title: currentFilters.search }),
           ...(currentFilters.location && { location: currentFilters.location }),
           ...(currentFilters.category && { category: currentFilters.category }),
           ...(currentFilters.dateFrom && { dateFrom: currentFilters.dateFrom }),

@@ -16,16 +16,22 @@ const EventsPageContent = () => {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <section className="text-center my-12">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter">
-          Find Tech Events Near You
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Discover Nigeria’s Tech Scene, one event at a time.
-        </p>
+      <section className="relative h-96 flex items-center justify-center text-center bg-cover bg-center" style={{ backgroundImage: "url('/EventNaija-logo.png')" }}>
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="relative z-10">
+          <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tighter">
+            Discover Nigeria's Tech Scene
+          </h1>
+          <p className="mt-4 text-lg text-white">
+            Your ultimate guide to tech events, workshops, and meetups across the nation.
+          </p>
+          <Button className="mt-8">Explore Events</Button>
+        </div>
       </section>
 
-      <FilterBar />
+      <div className="my-8">
+        <FilterBar />
+      </div>
 
       <Button onClick={() => setShowMap(!showMap)} className="mb-4">
         {showMap ? 'Hide Map' : 'Show Map'}

@@ -15,9 +15,12 @@ const EventCard = ({ event }: EventCardProps) => {
   });
 
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="flex flex-col h-full overflow-hidden transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl">
+      <div className="h-48 bg-gray-200 flex items-center justify-center">
+        <span className="text-gray-500">Event Image</span>
+      </div>
       <CardHeader>
-        <CardTitle className="text-xl">{event.title}</CardTitle>
+        <CardTitle className="text-xl line-clamp-1">{event.title}</CardTitle>
         <CardDescription className="flex items-center pt-2">
           <Calendar className="h-4 w-4 mr-2" />
           {formattedDate}
@@ -32,7 +35,7 @@ const EventCard = ({ event }: EventCardProps) => {
           <Tag className="h-4 w-4 mr-2" />
           <span>{event.category}</span>
         </div>
-        {event.description && <p className="mt-4 text-sm">{event.description}</p>}
+        {event.description && <p className="mt-4 text-sm line-clamp-3">{event.description}</p>}
       </CardContent>
       <CardFooter className="flex justify-between">
         <div className="flex space-x-2">
