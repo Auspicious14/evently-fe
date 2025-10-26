@@ -12,14 +12,14 @@ export const SignupPage = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { register, error } = useAuth();
+  const { register, error, loading } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await register({ username, email, password });
-      router.push("/");
+      // router.push("/");
     } catch (err) {
       console.error(err);
     }
@@ -53,8 +53,8 @@ export const SignupPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <Button type="submit" className="w-full">
-              Sign Up
+            <Button disabled={loading} type="submit" className="w-full">
+              {loading ? "Loading..." : "Sign Up"}
             </Button>
           </div>
         </form>

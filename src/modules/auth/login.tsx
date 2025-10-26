@@ -7,18 +7,18 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Link from "next/link";
 
 export const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { login, loginWithTwitter, error } = useAuth();
+  const { login, loginWithTwitter, error, loading } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await login({ username, password });
-      router.push("/");
     } catch (err) {
       console.error(err);
     }
@@ -45,12 +45,13 @@ export const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <Button type="submit" className="w-full">
-              Login
+            <Button disabled={loading} type="submit" className="w-full">
+              {loading ? "Loading..." : "Login"}
             </Button>
           </div>
         </form>
         <div className="text-center mt-4">
+          <Link href="/signup">Signup</Link>
           <Button onClick={loginWithTwitter} variant="outline">
             Login with X
           </Button>
