@@ -1,25 +1,20 @@
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
+import { useRouter } from "next/router";
+import React, { useEffect } from "react";
 
-const AuthSuccessPage = () => {
+export const AuthSuccessPage = () => {
   const router = useRouter();
-  const { handleAuthentication } = useAuth();
+  const searchParams = router.query;
+  const token = searchParams.token as string;
 
   useEffect(() => {
-    const { token } = router.query;
-
     if (token) {
-      handleAuthentication(token as string);
-      router.push('/'); // Redirect to the homepage after successful login
+      localStorage.setItem("access_token", token);
+
+      router.push("/");
+    } else {
+      router.push("/login");
     }
-  }, [router.query, handleAuthentication, router]);
+  }, [router]);
 
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <p>Authenticating, please wait...</p>
-    </div>
-  );
+  return <div>Authenticating...</div>;
 };
-
-export default AuthSuccessPage;

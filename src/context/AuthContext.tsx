@@ -1,8 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiClient } from '@/lib/api';
-import { jwtDecode } from 'jwt-decode';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { apiClient } from "@/lib/api";
+import { jwtDecode } from "jwt-decode";
+import { ISignup } from "@/modules/auth/model";
+import { toast } from "sonner";
 
 interface IUser {
   id: string;
@@ -15,6 +23,8 @@ interface IAuthContext {
   loading: boolean;
   error: string | null;
   loginWithTwitter: () => void;
+  login: (payload: { username: string; password: string }) => Promise<void>;
+  register: (payload: ISignup) => Promise<void>;
   handleAuthentication: (token: string) => void;
   logout: () => void;
 }
@@ -27,30 +37,63 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     if (token) {
       try {
         const decodedUser = jwtDecode<IUser>(token);
         setUser(decodedUser);
-        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       } catch (e) {
         console.error("Invalid token:", e);
-        localStorage.removeItem('authToken');
+        localStorage.removeItem("authToken");
       }
     }
     setLoading(false);
   }, []);
 
+  const login = async (payload: { username: string; password: string }) => {
+    setLoading(true);
+    try {
+      const response = await apiClient.post("/auth/login", payload);
+      if (response?.data?.success) {
+        const token = response.data.token;
+        handleAuthentication(token);
+        toast.success("Login successful!");
+      }
+    } catch (error) {
+      setError("Failed to login. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (payload: ISignup) => {
+    setLoading(true);
+    try {
+      const response = await apiClient.post("/auth/register", payload);
+      if (response?.data?.success) {
+        const token = response.data.token;
+        handleAuthentication(token);
+        toast.success("Signup successful!");
+      }
+    } catch (error) {
+      setError("Failed to register. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loginWithTwitter = () => {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:12000";
     window.location.href = `${backendUrl}/auth/twitter`;
   };
 
   const handleAuthentication = (token: string) => {
     try {
       const decodedUser = jwtDecode<IUser>(token);
-      localStorage.setItem('authToken', token);
-      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      localStorage.setItem("authToken", token);
+      apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setUser(decodedUser);
     } catch (e) {
       console.error("Failed to decode token:", e);
@@ -59,13 +102,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
-    delete apiClient.defaults.headers.common['Authorization'];
+    localStorage.removeItem("authToken");
+    delete apiClient.defaults.headers.common["Authorization"];
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, loginWithTwitter, handleAuthentication, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        error,
+        loginWithTwitter,
+        login,
+        register,
+        handleAuthentication,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -74,7 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

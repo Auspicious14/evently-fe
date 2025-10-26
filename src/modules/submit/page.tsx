@@ -1,11 +1,11 @@
 "use client";
 
-import React from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import EventForm from './components/EventForm';
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/router';
+import React from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import EventForm from "./components/EventForm";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/router";
 
 const SubmitPageContent = () => {
   const { user, loading } = useAuth();
@@ -13,7 +13,7 @@ const SubmitPageContent = () => {
 
   React.useEffect(() => {
     if (loading) return; // Do nothing while loading
-    if (!user) router.push('/login'); // Redirect if not authenticated
+    if (!user) router.push("/login"); // Redirect if not authenticated
   }, [user, loading, router]);
 
   if (loading || !user) {
