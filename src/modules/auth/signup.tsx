@@ -12,7 +12,7 @@ export const SignupPage = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { register, error, loading } = useAuth();
+  const { register, loading } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,7 +58,6 @@ export const SignupPage = () => {
             </Button>
           </div>
         </form>
-        {error && <p className="text-red-500 mt-4">{error}</p>}
       </main>
       <Footer />
     </div>

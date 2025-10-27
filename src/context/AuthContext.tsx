@@ -21,9 +21,8 @@ interface IUser {
 interface IAuthContext {
   user: IUser | null;
   loading: boolean;
-  error: string | null;
   loginWithTwitter: () => void;
-  login: (payload: { username: string; password: string }) => Promise<void>;
+  login: (payload: { username: string; pass: string }) => Promise<void>;
   register: (payload: ISignup) => Promise<void>;
   handleAuthentication: (token: string) => void;
   logout: () => void;
@@ -34,7 +33,6 @@ const AuthContext = createContext<IAuthContext | null>(null);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -51,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const login = async (payload: { username: string; password: string }) => {
+  const login = async (payload: { username: string; pass: string }) => {
     setLoading(true);
     try {
       const response = await apiClient.post("/auth/login", payload);
@@ -61,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         toast.success("Login successful!");
       }
     } catch (error) {
-      setError("Failed to login. Please try again.");
+      toast.error("Failed to login. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -77,16 +75,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         toast.success("Signup successful!");
       }
     } catch (error) {
-      setError("Failed to register. Please try again.");
+      toast.error("Failed to register. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const loginWithTwitter = () => {
-    const backendUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:12000";
-    window.location.href = `${backendUrl}/auth/twitter`;
+    setLoading(true);
+    try {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:12000";
+      window.location.href = `${backendUrl}/auth/twitter`;
+    } catch (e: any) {
+      console.error("Failed to login with Twitter:", e);
+      toast.error("Failed to login with Twitter. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAuthentication = (token: string) => {
@@ -95,9 +101,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem("authToken", token);
       apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setUser(decodedUser);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Failed to decode token:", e);
-      setError("Received an invalid token from the server.");
+      return e?.message || "Failed to decode token.";
     }
   };
 
@@ -112,7 +118,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       value={{
         user,
         loading,
-        error,
         loginWithTwitter,
         login,
         register,

@@ -1,10 +1,10 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { Menu } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Menu } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const Header = () => {
-  const { user, logout, loginWithTwitter } = useAuth();
+  const { user, logout, loginWithTwitter, loading } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -15,10 +15,16 @@ const Header = () => {
             <span className="font-bold inline-block">EventNaija</span>
           </Link>
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-            <Link href="/" className="transition-colors hover:text-foreground/80 text-foreground/60">
+            <Link
+              href="/"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
               Home
             </Link>
-            <Link href="/submit" className="transition-colors hover:text-foreground/80 text-foreground/60">
+            <Link
+              href="/submit"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
               Submit Event
             </Link>
           </nav>
@@ -27,7 +33,10 @@ const Header = () => {
           {user ? (
             <Button onClick={logout}>Logout</Button>
           ) : (
-            <Button onClick={loginWithTwitter}>Sign In with X</Button>
+            <Button disabled={loading} onClick={loginWithTwitter}>
+              {" "}
+              {loading ? "Loading..." : "Login with X"}
+            </Button>
           )}
         </div>
       </div>

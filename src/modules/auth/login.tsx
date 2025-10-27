@@ -12,13 +12,13 @@ import Link from "next/link";
 export const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { login, loginWithTwitter, error, loading } = useAuth();
+  const { login, loginWithTwitter, loading } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login({ username, password });
+      await login({ username, pass: password });
     } catch (err) {
       console.error(err);
     }
@@ -52,11 +52,14 @@ export const LoginPage = () => {
         </form>
         <div className="text-center mt-4">
           <Link href="/signup">Signup</Link>
-          <Button onClick={loginWithTwitter} variant="outline">
-            Login with X
+          <Button
+            disabled={loading}
+            onClick={loginWithTwitter}
+            variant="outline"
+          >
+            {loading ? "Loading..." : "Login with X"}
           </Button>
         </div>
-        {error && <p className="text-red-500 mt-4">{error}</p>}
       </main>
       <Footer />
     </div>

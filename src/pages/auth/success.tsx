@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
-export const AuthSuccessPage = () => {
+ const AuthSuccessPage = () => {
   const router = useRouter();
   const searchParams = router.query;
   const token = searchParams.token as string;
@@ -18,3 +18,5 @@ export const AuthSuccessPage = () => {
 
   return <div>Authenticating...</div>;
 };
+
+export default AuthSuccessPage
