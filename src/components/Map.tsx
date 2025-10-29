@@ -59,14 +59,13 @@ export default function Map({
     return null;
   };
 
-  const eventsWithCoords = events
-    .map(event => ({
+  const eventsWithCoords = events?.map(event => ({
       ...event,
-      coords: event.coordinates?.coordinates?.length >= 2
-        ? [event.coordinates.coordinates[1], event.coordinates.coordinates[0]] as [number, number]
-        : getCoordinates(event.location)
+      coords: event?.coordinates?.coordinates?.length >= 2
+        ? [event?.coordinates?.coordinates[1], event?.coordinates?.coordinates[0]] as [number, number]
+        : getCoordinates(event?.location)
     }))
-    .filter(event => event.coords !== null);
+    .filter(event => event?.coords !== null);
 
   return (
     <div className="rounded-xl overflow-hidden border shadow-sm">
