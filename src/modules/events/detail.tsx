@@ -27,7 +27,7 @@ const getCategoryGradient = (category: string) => {
   return gradients[category] || 'from-gray-400 to-gray-600';
 };
 
-export default function EventDetailPage() {
+export const EventDetailPage = () => {
   const router = useRouter();
   const { _id } = router.query;
   const { getEvent, upvoteEvent, flagEvent } = useEvents();
