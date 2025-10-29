@@ -3,9 +3,6 @@ import { toast } from "sonner";
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:12000",
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -13,6 +10,9 @@ apiClient.interceptors.request.use((config) => {
     typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  if (!(config.data instanceof FormData)) {
+    config.headers["Content-Type"] = "application/json";
   }
   return config;
 });

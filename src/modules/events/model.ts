@@ -15,6 +15,7 @@ export interface IEvent {
   flags: number;
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string; // ISO 8601 format
+  imageUrls?: string[];
 }
 
 export enum Category {
