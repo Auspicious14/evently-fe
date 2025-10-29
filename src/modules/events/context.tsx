@@ -68,12 +68,9 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
           limit,
           skip: currentSkip,
         };
-        const { data } = await apiClient.get<{
-          data: IEvent[];
-          total: number;
-        }>("/events", { params: apiFilters });
-        setEvents((prev) => (append ? [...prev, ...data.data] : data.data));
-        setHasMore(currentSkip + data.data.length < data.total);
+        const { data } = await apiClient.get<IEvent[]>("/events", { params: apiFilters });
+        setEvents((prev) => (append ? [...prev, ...data] : data));
+        setHasMore(data.length === limit);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to fetch events.";

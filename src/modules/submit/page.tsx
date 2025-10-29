@@ -12,39 +12,36 @@ const SubmitPageContent = () => {
   const router = useRouter();
 
   React.useEffect(() => {
-    if (loading) return; // Do nothing while loading
-    if (!user) router.push("/login"); // Redirect if not authenticated
+    if (loading) return;
+    if (!user) router.push("/login");
   }, [user, loading, router]);
 
   if (loading || !user) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-screen">
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <section className="text-center my-12">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter">
-          Share a Tech Event
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Contribute to the community by adding a new event.
+    <main className="container mx-auto px-4 py-12">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold">Submit New Event</h1>
+        <p className="mt-4 text-lg text-gray-600">
+          Got an event you'd like to share? Fill out the form below.
         </p>
-      </section>
-
-      <EventForm />
+      </div>
+      <div className="max-w-3xl mx-auto">
+        <EventForm />
+      </div>
     </main>
   );
 };
 
 const SubmitPage = () => {
-  // This is the top-level component for the page.
-  // It ensures that the context provider wraps everything that needs access to the submit state.
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <div className="flex-grow">
         <SubmitPageContent />
