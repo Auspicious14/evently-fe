@@ -9,4 +9,5 @@ export interface IEventInput {
   isFree: boolean;
   link?: string;
   images?: FileList;
+  eventType?: 'online' | 'in-person';
 }
