@@ -10,8 +10,6 @@ export default function AuthSuccessPage() {
   const token = searchParams.token as string;
 
   useEffect(() => {
-    const token = searchParams.get('token');
-
     if (token) {
       handleAuthentication(token);
       setTimeout(() => {
