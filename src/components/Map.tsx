@@ -83,7 +83,7 @@ export default function Map({
         {eventsWithCoords.map((event) => (
           event.coords && (
             <Marker 
-              key={event.id} 
+              key={event._id} 
               position={event.coords}
             >
               <Popup>
@@ -96,7 +96,7 @@ export default function Map({
                     {event.location}
                   </p>
                   <a 
-                    href={`/events/${event.id}`}
+                    href={`/events/${event._id}`}
                     className="text-xs text-primary hover:underline"
                   >
                     View Details →
