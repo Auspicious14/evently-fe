@@ -9,7 +9,7 @@ interface ISubmitContext {
   isSubmitting: boolean;
   error: string | null;
   success: boolean;
-  submitEvent: (eventData: IEventInput) => Promise<void>;
+  submitEvent: (eventData: FormData) => Promise<void>;
   resetState: () => void;
 }
 
@@ -20,7 +20,7 @@ export const SubmitProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
 
-  const submitEvent = useCallback(async (eventData: IEventInput) => {
+  const submitEvent = useCallback(async (eventData: FormData) => {
     setIsSubmitting(true);
     setError(null);
     setSuccess(false);

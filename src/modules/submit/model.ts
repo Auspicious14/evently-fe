@@ -8,4 +8,5 @@ export interface IEventInput {
   category: Category;
   isFree: boolean;
   link?: string;
+  images?: FileList;
 }
