@@ -1,45 +1,48 @@
+// components/Map.tsx
 "use client";
 
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import { IEvent } from "@/modules/events/model";
+
+// Fix Leaflet icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: '/leaflet/marker-icon-2x.png',
+  iconUrl: '/leaflet/marker-icon.png',
+  shadowUrl: '/leaflet/marker-shadow.png',
+});
 
 type MapProps = {
   events: IEvent[];
-  center?: { lat: number; lng: number };
+  center?: [number, number];
 };
 
-const containerStyle = {
-  width: "100%",
-  height: "400px",
-};
-
-const defaultCenter = {
-  lat: 6.5244, // Lagos latitude
-  lng: 3.3792, // Lagos longitude
-};
-
-export default function Map({ events, center = defaultCenter }: MapProps) {
+export default function Map({ events, center = [6.5244, 3.3792] }: MapProps) {
   return (
-    <LoadScript
-      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}
+    <MapContainer 
+      center={center} 
+      zoom={8} 
+      style={{ height: '400px', width: '100%', borderRadius: '12px' }}
     >
-      <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={8}>
-        {events.map(
-          (event) =>
-            event.coordinates &&
-            event.coordinates.coordinates &&
-            event.coordinates.coordinates.length >= 2 && (
-              <Marker
-                key={event.id}
-                position={{
-                  lat: event.coordinates.coordinates[1],
-                  lng: event.coordinates.coordinates[0],
-                }}
-                title={event.title}
-              />
-            )
-        )}
-      </GoogleMap>
-    </LoadScript>
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      />
+      {events.map((event) =>
+        event.coordinates?.coordinates?.length >= 2 ? (
+          <Marker
+            key={event.id}
+            position={[
+              event.coordinates.coordinates[1],
+              event.coordinates.coordinates[0],
+            ]}
+          >
+            <Popup>{event.title}</Popup>
+          </Marker>
+        ) : null
+      )}
+    </MapContainer>
   );
 }
