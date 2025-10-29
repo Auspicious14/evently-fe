@@ -111,7 +111,7 @@ export const LandingPage = () => {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredEvents.map((event) => (
-                <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <Card key={event._id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className={`h-32 ${getCategoryGradient(event.category)}`}></div>
                   <div className="p-4">
                     <div className="flex items-center gap-2 mb-2">
