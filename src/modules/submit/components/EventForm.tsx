@@ -1,50 +1,86 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller } from 'react-hook-form';
 import { useSubmit } from '../context';
 import { IEventInput } from '../model';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Category, NigerianStates } from '@/modules/events/model';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
-import { Upload } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 
 const EventForm = () => {
   const { submitEvent, isSubmitting, error, success, resetState } = useSubmit();
+  const [imagePreview, setImagePreview] = useState<string[]>([]);
+  
   const {
     register,
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors, isValid },
   } = useForm<IEventInput>({
     mode: 'onChange',
+    defaultValues: {
+      eventType: 'in-person',
+      isFree: true,
+    },
   });
 
   const router = useRouter();
 
   useEffect(() => {
     if (success) {
-      toast.success('Event submitted successfully! It will be reviewed by our team.');
+      toast.success('Event submitted successfully!');
       reset();
+      setImagePreview([]);
       setTimeout(() => {
         router.push('/dashboard');
       }, 2000);
     }
   }, [success, reset, router]);
 
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const previews: string[] = [];
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          previews.push(reader.result as string);
+          if (previews.length === files.length) {
+            setImagePreview(previews);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImagePreview(prev => prev.filter((_, i) => i !== index));
+  };
+
   const onSubmit = (data: IEventInput) => {
     const formData = new FormData();
+    
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'images') {
         if (value) {
-          for (let i = 0; i < value.length; i++) {
-            formData.append('images', value[i]);
-          }
+          Array.from(value as FileList).forEach((file) => {
+            formData.append('images', file);
+          });
         }
       } else if (value !== undefined && value !== null) {
         if (key === 'date') {
@@ -54,14 +90,9 @@ const EventForm = () => {
         }
       }
     });
+    
     submitEvent(formData);
   };
-
-  useEffect(() => {
-    return () => {
-      resetState();
-    };
-  }, [resetState]);
 
   return (
     <Card className="p-6 md:p-8">
@@ -87,29 +118,13 @@ const EventForm = () => {
           <label htmlFor="description" className="block text-sm font-medium mb-2">
             Event Description
           </label>
-          <div className="border rounded-lg">
-            <div className="flex gap-2 p-2 border-b bg-gray-50">
-              <button type="button" className="p-2 hover:bg-gray-200 rounded">
-                <strong>B</strong>
-              </button>
-              <button type="button" className="p-2 hover:bg-gray-200 rounded">
-                <em>I</em>
-              </button>
-              <button type="button" className="p-2 hover:bg-gray-200 rounded">
-                <u>U</u>
-              </button>
-              <button type="button" className="p-2 hover:bg-gray-200 rounded">
-                ≡
-              </button>
-            </div>
-            <textarea
-              id="description"
-              {...register('description')}
-              placeholder="Provide a detailed description of your event..."
-              rows={6}
-              className="w-full p-4 resize-none focus:outline-none"
-            />
-          </div>
+          <textarea
+            id="description"
+            {...register('description')}
+            placeholder="Provide a detailed description of your event..."
+            rows={6}
+            className="w-full p-4 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+          />
         </div>
 
         {/* Date & Time and Location */}
@@ -188,71 +203,138 @@ const EventForm = () => {
             <label className="block text-sm font-medium mb-2">
               Event Type
             </label>
-            <div className="grid grid-cols-2 gap-3 h-12">
-              <Controller
-                name="isFree"
-                control={control}
-                defaultValue={true}
-                render={({ field }) => (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => field.onChange(true)}
-                      className={`h-full rounded-lg border-2 font-medium transition-colors ${
-                        field.value
-                          ? 'bg-primary text-white border-primary'
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      In-person
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => field.onChange(false)}
-                      className={`h-full rounded-lg border-2 font-medium transition-colors ${
-                        !field.value
-                          ? 'bg-primary text-white border-primary'
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      Online
-                    </button>
-                  </>
-                )}
-              />
-            </div>
+            <Controller
+              name="eventType"
+              control={control}
+              defaultValue="in-person"
+              render={({ field }) => (
+                <div className="grid grid-cols-2 gap-3 h-12">
+                  <button
+                    type="button"
+                    onClick={() => field.onChange('in-person')}
+                    className={`h-full rounded-lg border-2 font-medium transition-colors ${
+                      field.value === 'in-person'
+                        ? 'bg-primary text-white border-primary'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    In-person
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => field.onChange('online')}
+                    className={`h-full rounded-lg border-2 font-medium transition-colors ${
+                      field.value === 'online'
+                        ? 'bg-primary text-white border-primary'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Online
+                  </button>
+                </div>
+              )}
+            />
           </div>
         </div>
 
-        {/* Event Link */}
-        <div>
-          <label htmlFor="link" className="block text-sm font-medium mb-2">
-            Event Link
-          </label>
-          <Input
-            id="link"
-            type="url"
-            {...register('link')}
-            placeholder="https://example.com"
-            className="h-12"
-          />
+        {/* Is Free and Event Link */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Ticket Type
+            </label>
+            <Controller
+              name="isFree"
+              control={control}
+              defaultValue={true}
+              render={({ field }) => (
+                <div className="grid grid-cols-2 gap-3 h-12">
+                  <button
+                    type="button"
+                    onClick={() => field.onChange(true)}
+                    className={`h-full rounded-lg border-2 font-medium transition-colors ${
+                      field.value === true
+                        ? 'bg-primary text-white border-primary'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Free
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => field.onChange(false)}
+                    className={`h-full rounded-lg border-2 font-medium transition-colors ${
+                      field.value === false
+                        ? 'bg-primary text-white border-primary'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Paid
+                  </button>
+                </div>
+              )}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="link" className="block text-sm font-medium mb-2">
+              Event Link
+            </label>
+            <Input
+              id="link"
+              type="url"
+              {...register('link')}
+              placeholder="https://example.com"
+              className="h-12"
+            />
+          </div>
         </div>
 
-        {/* Event Image */}
+        {/* Event Images */}
         <div>
           <label className="block text-sm font-medium mb-2">
-            Event Image
+            Event Images (Max 5)
           </label>
-          <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+          <label htmlFor="images" className="block border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
             <Upload className="h-12 w-12 text-gray-400 mx-auto mb-3" />
             <p className="text-sm font-medium mb-1">
               Click to upload <span className="text-muted-foreground">or drag and drop</span>
             </p>
             <p className="text-xs text-muted-foreground">
-              PNG, JPG or GIF (MAX. 800x400px)
+              PNG, JPG or GIF (MAX. 5MB each)
             </p>
-            <input id="images" type="file" {...register('images')} multiple className="hidden" />
-          </div>
+          </label>
+          <input
+            id="images"
+            type="file"
+            {...register('images')}
+            onChange={handleImageChange}
+            multiple
+            accept="image/*"
+            className="hidden"
+          />
+          
+          {/* Image Preview */}
+          {imagePreview.length > 0 && (
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-4 mt-4">
+              {imagePreview.map((preview, index) => (
+                <div key={index} className="relative group">
+                  <img
+                    src={preview}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-24 object-cover rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Actions */}
@@ -265,14 +347,6 @@ const EventForm = () => {
             size="lg"
           >
             Cancel
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            size="lg"
-          >
-            Preview
           </Button>
           <Button
             type="submit"
