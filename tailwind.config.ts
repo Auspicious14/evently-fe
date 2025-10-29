@@ -1,10 +1,8 @@
-/** @type {import('tailwindcss').Config}  */
+/** @type {import('tailwindcss').Config} */
 
 const config = {
   darkMode: "class",
-  content: [
-    './src/**/*.{ts,tsx}',
-  ],
+  content: ['./src/**/*.{ts,tsx}'],
   prefix: "",
   theme: {
     container: {
@@ -22,12 +20,16 @@ const config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#00D66F", // Green from design
+          foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#FF6B35", // Orange accent
+          foreground: "#FFFFFF",
+        },
+        twitter: {
+          DEFAULT: "#1DA1F2", // Twitter blue
+          foreground: "#FFFFFF",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
