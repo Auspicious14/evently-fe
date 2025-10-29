@@ -1,13 +1,8 @@
-import EventsPage from "@/modules/events/page";
-import { EventsProvider } from "@/modules/events/context";
+import { LandingPage } from "@/modules/home/page";
 
-// The homepage, which renders the Events module.
-// We wrap it with the EventsProvider so the page and all its children have access to the event state.
 const HomePage = () => {
   return (
-    <EventsProvider>
-      <EventsPage />
-    </EventsProvider>
+    <LandingPage />
   );
 };
 
