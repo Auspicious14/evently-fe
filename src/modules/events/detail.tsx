@@ -307,7 +307,7 @@ export const EventDetailPage = () => {
                     {similarEvents.slice(0, 3).map((similarEvent) => (
                       <Link
                         key={similarEvent._id}
-                        href={`/events/${similarEvent.id}`}
+                        href={`/events/${similarEvent._id}`}
                         className="block hover:bg-gray-50 p-3 rounded-lg transition-colors"
                       >
                         <div className="flex gap-3">
