@@ -123,7 +123,7 @@ export const EventsPage = () => {
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
-              <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={event._id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 {/* Gradient Header */}
                 <div className={`h-48 ${getCategoryGradient(event.category)} flex items-end p-4`}>
                   <div className="flex gap-2">
@@ -141,7 +141,7 @@ export const EventsPage = () => {
                 {/* Content */}
                 <div className="p-4">
                   <h3 className="font-bold text-lg mb-2 line-clamp-2 hover:text-primary">
-                    <Link href={`/events/${event.id}`}>{event.title}</Link>
+                    <Link href={`/events/${event._id}`}>{event.title}</Link>
                   </h3>
 
                   <div className="space-y-2 text-sm text-muted-foreground mb-4">
@@ -169,7 +169,7 @@ export const EventsPage = () => {
                   {/* Actions */}
                   <div className="flex items-center justify-between">
                     <button
-                      onClick={() => upvoteEvent(event.id)}
+                      onClick={() => upvoteEvent(event._id)}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
                     >
                       <ArrowUp className="h-4 w-4" />
@@ -180,7 +180,7 @@ export const EventsPage = () => {
                       <Button variant="ghost" size="icon" className="h-9 w-9">
                         <Share2 className="h-4 w-4" />
                       </Button>
-                      <Link href={`/events/${event.id}`}>
+                      <Link href={`/events/${event._id}`}>
                         <Button size="sm" className="bg-primary hover:bg-primary/90">
                           View Details
                         </Button>
