@@ -1,29 +1,20 @@
 import '@/styles/globals.css';
+import 'leaflet/dist/leaflet.css';
 import type { AppProps } from 'next/app';
-import Head from 'next/head';
-import { Inter } from 'next/font/google';
-import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/context/AuthContext';
-
-// If loading a variable font, you don't need to specify the font weight
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-});
+import { EventsProvider } from '@/modules/events/context';
+import { SubmitProvider } from '@/modules/submit/context';
+import { ToastProvider } from '@/components/ToastProvider';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <>
-      <Head>
-        <title>EventNaija</title>
-        <meta name="description" content="Discover tech events in Nigeria" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <AuthProvider>
-        <div className={cn('min-h-screen bg-background font-sans antialiased', inter.variable)}>
+    <AuthProvider>
+      <EventsProvider>
+        <SubmitProvider>
+          <ToastProvider />
           <Component {...pageProps} />
-        </div>
-      </AuthProvider>
-    </>
+        </SubmitProvider>
+      </EventsProvider>
+    </AuthProvider>
   );
 }
