@@ -1,33 +1,34 @@
-import { useRouter } from "next/router";
-import React, { useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
 
- const AuthSuccessPage = () => {
+import { useEffect } from 'react';
+import { useRouter } from "next/router";
+import { useAuth } from '@/context/AuthContext';
+
+export default function AuthSuccessPage() {
   const { handleAuthentication } = useAuth();
-  const router = useRouter();
+   const router = useRouter();
   const searchParams = router.query;
   const token = searchParams.token as string;
 
   useEffect(() => {
-    if (token) {
-      //localStorage.setItem("access_token", token);
-     handleAuthentication(token);
+    const token = searchParams.get('token');
 
-      router.push("/");
+    if (token) {
+      handleAuthentication(token);
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
     } else {
-      router.push("/login");
+      router.push('/login');
     }
-  }, [router]);
+  }, [searchParams, router, handleAuthentication]);
 
   return (
-   <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
         <h2 className="text-xl font-semibold mb-2">Authenticating...</h2>
-        <p className="text-gray-600">Please wait while we log you in.</p>
+        <p className="text-muted-foreground">Please wait while we log you in.</p>
       </div>
     </div>
   );
-};
-
-export default AuthSuccessPage
+}
