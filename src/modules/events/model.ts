@@ -1,5 +1,5 @@
 export interface IEvent {
-  id: string;
+  _id: string;
   title: string;
   description?: string;
   date: string; // ISO 8601 format
