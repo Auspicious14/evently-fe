@@ -156,7 +156,7 @@ const DashboardTab = () => {
 
   const { stats, recentActivity, topPerformingEvents, categoryBreakdown } = overview ?? {};
 
-  const getActivityMessage = (activity) => {
+  const getActivityMessage = (activity: any) => {
     switch (activity.activityType) {
       case 'event_create':
         return `You submitted '${activity.eventTitle}'`;
@@ -216,7 +216,7 @@ const DashboardTab = () => {
         <Card className="p-6 lg:col-span-2">
           <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
           <div className="space-y-4">
-            {recentActivity?.map((activity) => (
+            {recentActivity?.map((activity: any) => (
               <div key={activity.date.toString()} className="flex items-start gap-3">
                 <div className="p-2 bg-blue-50 rounded-lg mt-1">
                   {activity.activityType.includes('upvote') && <ThumbsUp className="h-4 w-4 text-blue-600" />}
@@ -281,7 +281,7 @@ const MyEventsTab = () => {
   const { overview, loading } = useDashboard();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
-  const filteredEvents = overview?.topPerformingEvents?.filter(event =>
+  const filteredEvents: any = overview?.topPerformingEvents?.filter(event =>
     filter === 'all' || event.status === filter
   ) ?? [];
 
