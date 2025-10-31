@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -18,9 +19,15 @@ import {
   Search,
   Menu
 } from 'lucide-react';
+import { useEvents } from '../events/context';
+import { useAdmin } from './context';
+import { apiClient } from '@/lib/api';
+import { toast } from 'sonner';
 
 export const AdminDashboard = () => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { events, setFilters, refetchEvents } = useEvents();
+  const { stats, loading: adminLoading } = useAdmin();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'events' | 'analytics' | 'settings'>('events');
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'posted'>('all');
@@ -28,30 +35,39 @@ export const AdminDashboard = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) {
+    if (!authLoading && (!user || user.role !== 'admin')) {
       router.push('/');
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
-  if (loading || !user || user.role !== 'admin') {
+  useEffect(() => {
+    const statusMap = {
+      all: '',
+      pending: 'pending',
+      approved: 'approved',
+      rejected: 'rejected',
+      posted: 'posted'
+    };
+    setFilters({ status: statusMap[filter], search: searchTerm });
+  }, [filter, searchTerm, setFilters]);
+
+  const handleUpdateStatus = async (eventId, status) => {
+    try {
+      await apiClient.patch(`/events/${eventId}/status`, { status });
+      toast.success(`Event ${status}`);
+      refetchEvents();
+    } catch (error) {
+      toast.error('Failed to update event status');
+    }
+  };
+
+  if (authLoading || !user || user.role !== 'admin') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
-
-  const stats = [
-    { label: 'Pending Events', value: '12', color: 'bg-yellow-50 text-yellow-600' },
-    { label: 'Approved Today', value: '5', color: 'bg-green-50 text-green-600' },
-    { label: 'Rejected Today', value: '2', color: 'bg-red-50 text-red-600' },
-  ];
-
-  const events = [
-    { id: 1, title: 'Lagos Tech Summit 2024', date: 'Oct 28, 2024', status: 'pending', submitter: 'Bola Ahmed' },
-    { id: 2, title: 'AI in FinTech Conference', date: 'Oct 25, 2024', status: 'approved', submitter: 'Chioma Nwosu' },
-    { id: 3, title: 'DevFest Abuja', date: 'Oct 22, 2024', status: 'rejected', submitter: 'Emeka Okafor' },
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -100,7 +116,7 @@ export const AdminDashboard = () => {
                   <FileText className="h-5 w-5 text-blue-600" />
                   <div>
                     <div className="text-xs text-muted-foreground">Pending Review</div>
-                    <div className="text-xl font-bold">12</div>
+                    <div className="text-xl font-bold">{stats?.pendingEvents ?? 0}</div>
                   </div>
                 </div>
               </div>
@@ -157,12 +173,18 @@ export const AdminDashboard = () => {
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Welcome, Admin!</h2>
               <div className="grid md:grid-cols-3 gap-6">
-                {stats.map((stat, i) => (
-                  <Card key={i} className="p-6">
-                    <div className="text-sm text-muted-foreground mb-2">{stat.label}</div>
-                    <div className="text-3xl font-bold">{stat.value}</div>
-                  </Card>
-                ))}
+                <Card className="p-6">
+                  <div className="text-sm text-muted-foreground mb-2">Pending Events</div>
+                  <div className="text-3xl font-bold">{stats?.pendingEvents ?? 0}</div>
+                </Card>
+                <Card className="p-6">
+                  <div className="text-sm text-muted-foreground mb-2">Approved Today</div>
+                  <div className="text-3xl font-bold">{stats?.approvedToday ?? 0}</div>
+                </Card>
+                <Card className="p-6">
+                  <div className="text-sm text-muted-foreground mb-2">Rejected Today</div>
+                  <div className="text-3xl font-bold">{stats?.rejectedToday ?? 0}</div>
+                </Card>
               </div>
             </div>
           )}
@@ -244,19 +266,19 @@ export const AdminDashboard = () => {
                     </thead>
                     <tbody className="divide-y">
                       {events.map((event) => (
-                        <tr key={event.id} className="hover:bg-gray-50">
+                        <tr key={event._id} className="hover:bg-gray-50">
                           <td className="px-6 py-4">
                             <div className="font-medium">{event.title}</div>
                           </td>
                           <td className="px-6 py-4 text-sm text-muted-foreground">
-                            {event.submitter}
+                            {event.submitter?.username ?? 'N/A'}
                           </td>
                           <td className="px-6 py-4 text-sm text-muted-foreground">
-                            {event.date}
+                            {new Date(event.date).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-                              Conference
+                              {event.category}
                             </span>
                           </td>
                           <td className="px-6 py-4">
@@ -277,10 +299,10 @@ export const AdminDashboard = () => {
                               <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600" onClick={() => handleUpdateStatus(event._id, 'approved')}>
                                 <Check className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => handleUpdateStatus(event._id, 'rejected')}>
                                 <X className="h-4 w-4" />
                               </Button>
                               <Button variant="ghost" size="icon" className="h-8 w-8">

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -14,9 +15,14 @@ import {
   Upload,
   CheckCircle,
   FileText,
-  Heart
+  Heart,
+  TrendingUp,
+  PieChart
 } from 'lucide-react';
 import Link from 'next/link';
+import { useDashboard } from './context';
+import { formatDistanceToNow, format } from 'date-fns';
+import { useEvents } from '../events/context';
 
 const Sidebar = ({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) => {
   const { user, logout } = useAuth();
@@ -138,6 +144,30 @@ const MobileNav = ({ activeTab, setActiveTab }: { activeTab: string; setActiveTa
 
 const DashboardTab = () => {
   const { user } = useAuth();
+  const { overview, loading } = useDashboard();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const { stats, recentActivity, topPerformingEvents, categoryBreakdown } = overview ?? {};
+
+  const getActivityMessage = (activity) => {
+    switch (activity.activityType) {
+      case 'event_create':
+        return `You submitted '${activity.eventTitle}'`;
+      case 'event_approve':
+        return `Your event '${activity.eventTitle}' was approved`;
+      case 'event_upvote':
+        return `You upvoted '${activity.eventTitle}'`;
+      default:
+        return activity.activityType.replace(/_/g, ' ');
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -150,70 +180,97 @@ const DashboardTab = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Events Submitted</div>
+            <div className="text-sm text-muted-foreground">Events Created</div>
             <FileText className="h-5 w-5 text-orange-500" />
           </div>
-          <div className="text-3xl font-bold">12</div>
+          <div className="text-3xl font-bold">{stats?.totalEventsCreated ?? 0}</div>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Events Approved</div>
+            <div className="text-sm text-muted-foreground">Approved Events</div>
             <CheckCircle className="h-5 w-5 text-green-500" />
           </div>
-          <div className="text-3xl font-bold">9</div>
+          <div className="text-3xl font-bold">{stats?.approvedEvents ?? 0}</div>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Total Upvotes Received</div>
+            <div className="text-sm text-muted-foreground">Pending Events</div>
+            <FileText className="h-5 w-5 text-yellow-500" />
+          </div>
+          <div className="text-3xl font-bold">{stats?.pendingEvents ?? 0}</div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm text-muted-foreground">Upvotes Received</div>
             <Heart className="h-5 w-5 text-red-500" />
           </div>
-          <div className="text-3xl font-bold">256</div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Events You've Upvoted</div>
-            <ThumbsUp className="h-5 w-5 text-blue-500" />
-          </div>
-          <div className="text-3xl font-bold">42</div>
+          <div className="text-3xl font-bold">{stats?.totalUpvotes ?? 0}</div>
         </Card>
       </div>
 
-      {/* Recent Activity */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Recent Activity */}
+        <Card className="p-6 lg:col-span-2">
+          <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
+          <div className="space-y-4">
+            {recentActivity?.map((activity) => (
+              <div key={activity.date.toString()} className="flex items-start gap-3">
+                <div className="p-2 bg-blue-50 rounded-lg mt-1">
+                  {activity.activityType.includes('upvote') && <ThumbsUp className="h-4 w-4 text-blue-600" />}
+                  {activity.activityType.includes('approve') && <CheckCircle className="h-4 w-4 text-green-600" />}
+                  {activity.activityType.includes('create') && <Upload className="h-4 w-4 text-orange-600" />}
+                </div>
+                <div>
+                  <p className="font-medium">{getActivityMessage(activity)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDistanceToNow(new Date(activity.date), { addSuffix: true })}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Category Breakdown */}
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4">Category Breakdown</h2>
+          <div className="space-y-3">
+            {categoryBreakdown?.map(cat => (
+              <div key={cat.category}>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="font-medium">{cat.category}</span>
+                  <span className="text-muted-foreground">{cat.percentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-primary h-2 rounded-full" style={{ width: `${cat.percentage}%` }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Top Performing Events */}
       <Card className="p-6">
-        <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
+        <h2 className="text-xl font-bold mb-4">Top Performing Events</h2>
         <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-50 rounded-lg mt-1">
-              <ThumbsUp className="h-4 w-4 text-blue-600" />
+          {topPerformingEvents?.map(event => (
+            <div key={event.eventId} className="flex items-center justify-between">
+              <div>
+                <Link href={`/events/${event.eventId}`}>
+                  <h3 className="font-semibold hover:underline">{event.title}</h3>
+                </Link>
+                <p className="text-sm text-muted-foreground">{event.location} • {format(new Date(event.date), 'MMM dd, yyyy')}</p>
+              </div>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1"><Heart className="h-4 w-4 text-red-500" /> {event.upvotes}</div>
+                <div className="flex items-center gap-1"><TrendingUp className="h-4 w-4 text-green-500" /> {event.views}</div>
+              </div>
             </div>
-            <div>
-              <p className="font-medium">You upvoted 'Lagos Tech Week'</p>
-              <p className="text-sm text-muted-foreground">2 hours ago</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-green-50 rounded-lg mt-1">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            </div>
-            <div>
-              <p className="font-medium">Your event 'AI in Fintech Summit' was approved</p>
-              <p className="text-sm text-muted-foreground">1 day ago</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-orange-50 rounded-lg mt-1">
-              <Upload className="h-4 w-4 text-orange-600" />
-            </div>
-            <div>
-              <p className="font-medium">You submitted 'DevFest Lagos 2024'</p>
-              <p className="text-sm text-muted-foreground">3 days ago</p>
-            </div>
-          </div>
+          ))}
         </div>
       </Card>
     </div>
@@ -221,7 +278,20 @@ const DashboardTab = () => {
 };
 
 const MyEventsTab = () => {
+  const { overview, loading } = useDashboard();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+
+  const filteredEvents = overview?.topPerformingEvents?.filter(event =>
+    filter === 'all' || event.status === filter
+  ) ?? [];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -239,7 +309,7 @@ const MyEventsTab = () => {
       <div className="flex gap-2 overflow-x-auto pb-2">
         {[
           { key: 'all', label: 'All' },
-          { key: 'pending', label: 'Pending Review' },
+          { key: 'pending', label: 'Pending' },
           { key: 'approved', label: 'Approved' },
           { key: 'rejected', label: 'Rejected' },
         ].map((tab) => (
@@ -259,25 +329,32 @@ const MyEventsTab = () => {
 
       {/* Events List */}
       <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="p-6">
+        {filteredEvents.map((event) => (
+          <Card key={event.eventId} className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-bold text-lg">Lagos Tech Summit 2024</h3>
-                  <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
-                    PENDING
+                  <h3 className="font-bold text-lg">{event.title}</h3>
+                  <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                    event.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                    event.status === 'approved' ? 'bg-green-100 text-green-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {event.status.toUpperCase()}
                   </span>
                 </div>
                 <div className="text-sm text-muted-foreground mb-2">
-                  Oct 28, 2024 • Lagos, Nigeria
+                  {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {event.location}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  A premier tech conference bringing together innovators...
-                </p>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span><Heart className="inline h-4 w-4 mr-1"/>{event.upvotes} Upvotes</span>
+                  <span><TrendingUp className="inline h-4 w-4 mr-1"/>{event.views} Views</span>
+                </div>
               </div>
               <div className="flex gap-2 ml-4">
-                <Button variant="ghost" size="sm">View</Button>
+                <Link href={`/events/${event.eventId}`}>
+                  <Button variant="ghost" size="sm">View</Button>
+                </Link>
                 <Button variant="ghost" size="sm">Edit</Button>
               </div>
             </div>
@@ -321,4 +398,4 @@ export const DashboardPage = () => {
       <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
-                }
+}

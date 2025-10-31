@@ -7,7 +7,8 @@ import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
 import { Search, Upload, Users, Calendar, MapPin, TrendingUp } from 'lucide-react';
 import { useEvents } from '@/modules/events/context';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { IEvent } from '../events/model';
 
 const getCategoryGradient = (category: string) => {
   const gradients: Record<string, string> = {
@@ -20,8 +21,18 @@ const getCategoryGradient = (category: string) => {
 };
 
 export const LandingPage = () => {
-  const { events } = useEvents();
-  const featuredEvents = events.slice(0, 4);
+  const { events, fetchEvents } = useEvents();
+  const [activeTab, setActiveTab] = useState('All');
+
+  useEffect(() => {
+    fetchEvents({ limit: 10, status: 'approved' });
+  }, [fetchEvents]);
+
+  const filteredEvents = (
+    activeTab === 'All'
+      ? events
+      : events.filter((event) => event.category === activeTab)
+  ).slice(0, 4);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -98,8 +109,9 @@ export const LandingPage = () => {
               {['All', 'Conferences', 'Workshops', 'Hackathons', 'Meetups'].map((tab) => (
                 <button
                   key={tab}
+                  onClick={() => setActiveTab(tab)}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                    tab === 'All'
+                    activeTab === tab
                       ? 'bg-primary text-white'
                       : 'bg-white border hover:border-primary'
                   }`}
@@ -110,7 +122,7 @@ export const LandingPage = () => {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredEvents.map((event) => (
+              {filteredEvents.map((event) => (
                 <Card key={event._id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className={`h-32 ${getCategoryGradient(event.category)}`}></div>
                   <div className="p-4">
@@ -186,32 +198,6 @@ export const LandingPage = () => {
           </div>
         </section>
 
-        {/* Community Section */}
-        <section className="py-16 bg-primary text-white">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-4">From the Community</h2>
-            <p className="text-white/90 mb-8 max-w-2xl mx-auto">
-              Curated events from Twitter
-            </p>
-
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto text-left">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="p-6">
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold">@TechZubie</div>
-                      <div className="text-xs text-muted-foreground">2 hours ago</div>
-                    </div>
-                  </div>
-                  <p className="text-sm">
-                    Just announced! The biggest AI Conference happening back in Lagos this December. Can't wait! #AICONF2024
-                  </p>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* CTA Section */}
         <section className="py-16">

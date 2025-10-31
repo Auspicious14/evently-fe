@@ -343,7 +343,7 @@ const EventForm = () => {
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            className="flex-1"
+            className="w-full md:w-auto md:flex-none"
             size="lg"
           >
             Cancel
@@ -351,7 +351,7 @@ const EventForm = () => {
           <Button
             type="submit"
             disabled={!isValid || isSubmitting}
-            className="flex-1 bg-primary hover:bg-primary/90"
+            className="w-full md:w-auto md:flex-none bg-primary hover:bg-primary/90"
             size="lg"
           >
             {isSubmitting ? 'Submitting...' : 'Submit for Review'}

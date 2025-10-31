@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, {
@@ -17,6 +18,7 @@ interface IEventFilters {
   category: Category | "";
   dateFrom: string;
   dateTo: string;
+  status: string;
 }
 
 interface IEventsContext {
@@ -45,6 +47,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     category: "",
     dateFrom: "",
     dateTo: "",
+    status: "",
   });
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -65,6 +68,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
           ...(currentFilters.category && { category: currentFilters.category }),
           ...(currentFilters.dateFrom && { dateFrom: currentFilters.dateFrom }),
           ...(currentFilters.dateTo && { dateTo: currentFilters.dateTo }),
+          ...(currentFilters.status && { status: currentFilters.status }),
           limit,
           skip: currentSkip,
         };
@@ -122,7 +126,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
 
   const upvoteEvent = useCallback(
     async (id: string) => {
-      await apiClient.post(`/events/${id}/upvote`);
+      await apiClient.patch(`/events/${id}/upvote`);
       refetchEvents();
     },
     [refetchEvents]
@@ -130,7 +134,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
 
   const flagEvent = useCallback(
     async (id: string) => {
-      await apiClient.post(`/events/${id}/flag`);
+      await apiClient.patch(`/events/${id}/flag`);
       refetchEvents();
     },
     [refetchEvents]

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import { useEvents } from '@/modules/events/context';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -27,9 +26,9 @@ const getCategoryGradient = (category: string) => {
   return gradients[category] || 'from-gray-400 to-gray-600';
 };
 
-export const EventDetailPage = () => {
+import { useRouter } from 'next/router';
+export const EventDetailPage = ({ _id }: { _id: string }) => {
   const router = useRouter();
-  const { _id } = router.query;
   const { getEvent, upvoteEvent, flagEvent } = useEvents();
   const [event, setEvent] = useState<IEvent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +43,7 @@ export const EventDetailPage = () => {
   const loadEvent = async () => {
     try {
       setLoading(true);
-      const data = await getEvent(_id as string);
+      const data = await getEvent(_id);
       setEvent(data);
       // TODO: Load similar events based on category
     } catch (error) {
