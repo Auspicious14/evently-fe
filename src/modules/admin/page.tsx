@@ -271,7 +271,7 @@ export const AdminDashboard = () => {
                             <div className="font-medium">{event.title}</div>
                           </td>
                           <td className="px-6 py-4 text-sm text-muted-foreground">
-                            {event.submitter?.username ?? 'N/A'}
+                            {event.submitterId ?? 'N/A'}
                           </td>
                           <td className="px-6 py-4 text-sm text-muted-foreground">
                             {new Date(event.date).toLocaleDateString()}
