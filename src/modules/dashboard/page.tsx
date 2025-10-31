@@ -278,9 +278,14 @@ const DashboardTab = () => {
 };
 
 const MyEventsTab = () => {
-  const { overview, loading } = useDashboard();
+  const { overview, loading, fetchData } = useDashboard();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  
   const filteredEvents: any = overview?.topPerformingEvents?.filter(event =>
     filter === 'all' || event.status === filter
   ) ?? [];
