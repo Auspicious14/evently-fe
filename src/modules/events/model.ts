@@ -2,19 +2,26 @@ export interface IEvent {
   _id: string;
   title: string;
   description?: string;
-  date: string; // ISO 8601 format
+  date: string;
   location: string;
   coordinates?: {
     type: 'Point';
-    coordinates: [number, number]; // [longitude, latitude]
+    coordinates: [number, number];
   };
   category: Category;
   isFree: boolean;
+  views: number
+  submitterId: string
   link?: string;
   upvotes: number;
   flags: number;
+  goingCount?: number;
+  shares?: number
+  eventType?: string;
+  source?: string;
+  sourceTweetId?: string;
   status: 'pending' | 'approved' | 'rejected';
-  createdAt: string; // ISO 8601 format
+  createdAt: string;
   imageUrls?: string[];
 }
 
