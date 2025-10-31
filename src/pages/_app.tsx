@@ -5,6 +5,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { EventsProvider } from '@/modules/events/context';
 import { SubmitProvider } from '@/modules/submit/context';
 import { DashboardProvider } from '@/modules/dashboard/context';
+import { AdminProvider } from '@/modules/admin/context';
 import { ToastProvider } from '@/components/ToastProvider';
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -13,8 +14,10 @@ export default function App({ Component, pageProps }: AppProps) {
       <EventsProvider>
         <SubmitProvider>
           <DashboardProvider>
-            <ToastProvider />
-            <Component {...pageProps} />
+            <AdminProvider>
+              <ToastProvider />
+              <Component {...pageProps} />
+            </AdminProvider>
           </DashboardProvider>
         </SubmitProvider>
       </EventsProvider>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -14,11 +15,14 @@ import {
   Upload,
   CheckCircle,
   FileText,
-  Heart
+  Heart,
+  TrendingUp,
+  PieChart
 } from 'lucide-react';
 import Link from 'next/link';
 import { useDashboard } from './context';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
+import { useEvents } from '../events/context';
 
 const Sidebar = ({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) => {
   const { user, logout } = useAuth();
@@ -140,7 +144,7 @@ const MobileNav = ({ activeTab, setActiveTab }: { activeTab: string; setActiveTa
 
 const DashboardTab = () => {
   const { user } = useAuth();
-  const { stats, activities, loading } = useDashboard();
+  const { overview, loading } = useDashboard();
 
   if (loading) {
     return (
@@ -148,6 +152,21 @@ const DashboardTab = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  const { stats, recentActivity, topPerformingEvents, categoryBreakdown } = overview ?? {};
+
+  const getActivityMessage = (activity) => {
+    switch (activity.activityType) {
+      case 'event_create':
+        return `You submitted '${activity.eventTitle}'`;
+      case 'event_approve':
+        return `Your event '${activity.eventTitle}' was approved`;
+      case 'event_upvote':
+        return `You upvoted '${activity.eventTitle}'`;
+      default:
+        return activity.activityType.replace(/_/g, ' ');
+    }
   }
 
   return (
@@ -161,53 +180,94 @@ const DashboardTab = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Events Submitted</div>
+            <div className="text-sm text-muted-foreground">Events Created</div>
             <FileText className="h-5 w-5 text-orange-500" />
           </div>
-          <div className="text-3xl font-bold">{stats?.eventsSubmitted ?? 0}</div>
+          <div className="text-3xl font-bold">{stats?.totalEventsCreated ?? 0}</div>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Events Approved</div>
+            <div className="text-sm text-muted-foreground">Approved Events</div>
             <CheckCircle className="h-5 w-5 text-green-500" />
           </div>
-          <div className="text-3xl font-bold">{stats?.eventsApproved ?? 0}</div>
+          <div className="text-3xl font-bold">{stats?.approvedEvents ?? 0}</div>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Total Upvotes Received</div>
+            <div className="text-sm text-muted-foreground">Pending Events</div>
+            <FileText className="h-5 w-5 text-yellow-500" />
+          </div>
+          <div className="text-3xl font-bold">{stats?.pendingEvents ?? 0}</div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm text-muted-foreground">Upvotes Received</div>
             <Heart className="h-5 w-5 text-red-500" />
           </div>
-          <div className="text-3xl font-bold">{stats?.upvotesReceived ?? 0}</div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Events You've Upvoted</div>
-            <ThumbsUp className="h-5 w-5 text-blue-500" />
-          </div>
-          <div className="text-3xl font-bold">{stats?.upvotedEvents ?? 0}</div>
+          <div className="text-3xl font-bold">{stats?.totalUpvotes ?? 0}</div>
         </Card>
       </div>
 
-      {/* Recent Activity */}
-      <Card className="p-6">
-        <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
-        <div className="space-y-4">
-          {activities.map((activity) => (
-            <div key={activity._id} className="flex items-start gap-3">
-              <div className="p-2 bg-blue-50 rounded-lg mt-1">
-                {activity.type === 'upvote' && <ThumbsUp className="h-4 w-4 text-blue-600" />}
-                {activity.type === 'approval' && <CheckCircle className="h-4 w-4 text-green-600" />}
-                {activity.type === 'submission' && <Upload className="h-4 w-4 text-orange-600" />}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Recent Activity */}
+        <Card className="p-6 lg:col-span-2">
+          <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
+          <div className="space-y-4">
+            {recentActivity?.map((activity) => (
+              <div key={activity.date.toString()} className="flex items-start gap-3">
+                <div className="p-2 bg-blue-50 rounded-lg mt-1">
+                  {activity.activityType.includes('upvote') && <ThumbsUp className="h-4 w-4 text-blue-600" />}
+                  {activity.activityType.includes('approve') && <CheckCircle className="h-4 w-4 text-green-600" />}
+                  {activity.activityType.includes('create') && <Upload className="h-4 w-4 text-orange-600" />}
+                </div>
+                <div>
+                  <p className="font-medium">{getActivityMessage(activity)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDistanceToNow(new Date(activity.date), { addSuffix: true })}
+                  </p>
+                </div>
               </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Category Breakdown */}
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4">Category Breakdown</h2>
+          <div className="space-y-3">
+            {categoryBreakdown?.map(cat => (
+              <div key={cat.category}>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="font-medium">{cat.category}</span>
+                  <span className="text-muted-foreground">{cat.percentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-primary h-2 rounded-full" style={{ width: `${cat.percentage}%` }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Top Performing Events */}
+      <Card className="p-6">
+        <h2 className="text-xl font-bold mb-4">Top Performing Events</h2>
+        <div className="space-y-4">
+          {topPerformingEvents?.map(event => (
+            <div key={event.eventId} className="flex items-center justify-between">
               <div>
-                <p className="font-medium">{activity.message}</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
-                </p>
+                <Link href={`/events/${event.eventId}`}>
+                  <h3 className="font-semibold hover:underline">{event.title}</h3>
+                </Link>
+                <p className="text-sm text-muted-foreground">{event.location} • {format(new Date(event.date), 'MMM dd, yyyy')}</p>
+              </div>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1"><Heart className="h-4 w-4 text-red-500" /> {event.upvotes}</div>
+                <div className="flex items-center gap-1"><TrendingUp className="h-4 w-4 text-green-500" /> {event.views}</div>
               </div>
             </div>
           ))}
@@ -217,18 +277,13 @@ const DashboardTab = () => {
   );
 };
 
-import { useEvents } from '../events/context';
 const MyEventsTab = () => {
-  const { events, setFilters, loading } = useEvents();
+  const { overview, loading } = useDashboard();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
-  useEffect(() => {
-    if (filter === 'all') {
-      setFilters({ status: '' });
-    } else {
-      setFilters({ status: filter });
-    }
-  }, [filter, setFilters]);
+  const filteredEvents = overview?.topPerformingEvents?.filter(event =>
+    filter === 'all' || event.status === filter
+  ) ?? [];
 
   if (loading) {
     return (
@@ -254,7 +309,7 @@ const MyEventsTab = () => {
       <div className="flex gap-2 overflow-x-auto pb-2">
         {[
           { key: 'all', label: 'All' },
-          { key: 'pending', label: 'Pending Review' },
+          { key: 'pending', label: 'Pending' },
           { key: 'approved', label: 'Approved' },
           { key: 'rejected', label: 'Rejected' },
         ].map((tab) => (
@@ -274,8 +329,8 @@ const MyEventsTab = () => {
 
       {/* Events List */}
       <div className="space-y-4">
-        {events.map((event) => (
-          <Card key={event._id} className="p-6">
+        {filteredEvents.map((event) => (
+          <Card key={event.eventId} className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
@@ -291,12 +346,13 @@ const MyEventsTab = () => {
                 <div className="text-sm text-muted-foreground mb-2">
                   {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {event.location}
                 </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {event.description}
-                </p>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span><Heart className="inline h-4 w-4 mr-1"/>{event.upvotes} Upvotes</span>
+                  <span><TrendingUp className="inline h-4 w-4 mr-1"/>{event.views} Views</span>
+                </div>
               </div>
               <div className="flex gap-2 ml-4">
-                <Link href={`/events/${event._id}`}>
+                <Link href={`/events/${event.eventId}`}>
                   <Button variant="ghost" size="sm">View</Button>
                 </Link>
                 <Button variant="ghost" size="sm">Edit</Button>
@@ -342,4 +398,4 @@ export const DashboardPage = () => {
       <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
-                }
+}

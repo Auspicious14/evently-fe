@@ -11,24 +11,17 @@ import React, {
 } from "react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-
-interface IDashboardStats {
-  eventsSubmitted: number;
-  eventsApproved: number;
-  upvotesReceived: number;
-  upvotedEvents: number;
-}
-
-interface IActivity {
-  _id: string;
-  type: "upvote" | "submission" | "approval";
-  message: string;
-  createdAt: string;
-}
+import {
+  DashboardOverviewDto,
+  DashboardStatsResponseDto,
+  ActivityTimelineDto,
+  EventPerformanceDto,
+  CategoryBreakdownDto,
+  ActivityTrendDto
+} from "./model";
 
 interface IDashboardContext {
-  stats: IDashboardStats | null;
-  activities: IActivity[];
+  overview: DashboardOverviewDto | null;
   loading: boolean;
   error: string | null;
   refetch: () => void;
@@ -37,23 +30,21 @@ interface IDashboardContext {
 const DashboardContext = createContext<IDashboardContext | null>(null);
 
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
-  const [stats, setStats] = useState<IDashboardStats | null>(null);
-  const [activities, setActivities] = useState<IActivity[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [overview, setOverview] = useState<DashboardOverviewDto | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   const fetchData = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    };
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, activitiesRes] = await Promise.all([
-        apiClient.get(`/users/${user.id}/dashboard-stats`),
-        apiClient.get(`/users/${user.id}/activities`),
-      ]);
-      setStats(statsRes.data.data);
-      setActivities(activitiesRes.data.data);
+      const response = await apiClient.get('/dashboard/overview');
+      setOverview(response.data);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch dashboard data.";
@@ -69,8 +60,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   }, [fetchData]);
 
   const value = {
-    stats,
-    activities,
+    overview,
     loading,
     error,
     refetch: fetchData,
