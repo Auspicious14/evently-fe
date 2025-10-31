@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
 import { Search, Upload, Users, Calendar, MapPin, TrendingUp } from 'lucide-react';
 import { useEvents } from '@/modules/events/context';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { IEvent } from '../events/model';
 
 const getCategoryGradient = (category: string) => {
@@ -21,13 +21,10 @@ const getCategoryGradient = (category: string) => {
 };
 
 export const LandingPage = () => {
-  const { events, fetchEvents } = useEvents();
+  const { events } = useEvents();
   const [activeTab, setActiveTab] = useState('All');
 
-  useEffect(() => {
-    fetchEvents({ limit: 10, status: 'approved' });
-  }, [fetchEvents]);
-
+  
   const filteredEvents = (
     activeTab === 'All'
       ? events
