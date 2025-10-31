@@ -24,7 +24,7 @@ interface IDashboardContext {
   overview: DashboardOverviewDto | null;
   loading: boolean;
   error: string | null;
-  refetch: () => void;
+  fetchData: () => void;
 }
 
 const DashboardContext = createContext<IDashboardContext | null>(null);
@@ -55,15 +55,13 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   const value = {
     overview,
     loading,
     error,
-    refetch: fetchData,
+    fetchData,
+    
   };
 
   return (
