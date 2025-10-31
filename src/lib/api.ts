@@ -30,7 +30,9 @@ apiClient.interceptors.response.use(
     if (error.response?.data) {
       const data: any = error.response.data;
 
-      if (data.message) {
+      if (Array.isArray(data.message)) {
+        normalizedError.message = data.message[0];
+      } else if (data.message) {
         normalizedError.message = data.message;
       }
 

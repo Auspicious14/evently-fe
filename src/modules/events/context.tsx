@@ -122,7 +122,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
 
   const upvoteEvent = useCallback(
     async (id: string) => {
-      await apiClient.post(`/events/${id}/upvote`);
+      await apiClient.patch(`/events/${id}/upvote`);
       refetchEvents();
     },
     [refetchEvents]
@@ -130,7 +130,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
 
   const flagEvent = useCallback(
     async (id: string) => {
-      await apiClient.post(`/events/${id}/flag`);
+      await apiClient.patch(`/events/${id}/flag`);
       refetchEvents();
     },
     [refetchEvents]
