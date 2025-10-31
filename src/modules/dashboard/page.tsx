@@ -17,6 +17,8 @@ import {
   Heart
 } from 'lucide-react';
 import Link from 'next/link';
+import { useDashboard } from './context';
+import { formatDistanceToNow } from 'date-fns';
 
 const Sidebar = ({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) => {
   const { user, logout } = useAuth();
@@ -138,6 +140,15 @@ const MobileNav = ({ activeTab, setActiveTab }: { activeTab: string; setActiveTa
 
 const DashboardTab = () => {
   const { user } = useAuth();
+  const { stats, activities, loading } = useDashboard();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -153,7 +164,7 @@ const DashboardTab = () => {
             <div className="text-sm text-muted-foreground">Events Submitted</div>
             <FileText className="h-5 w-5 text-orange-500" />
           </div>
-          <div className="text-3xl font-bold">12</div>
+          <div className="text-3xl font-bold">{stats?.eventsSubmitted ?? 0}</div>
         </Card>
 
         <Card className="p-6">
@@ -161,7 +172,7 @@ const DashboardTab = () => {
             <div className="text-sm text-muted-foreground">Events Approved</div>
             <CheckCircle className="h-5 w-5 text-green-500" />
           </div>
-          <div className="text-3xl font-bold">9</div>
+          <div className="text-3xl font-bold">{stats?.eventsApproved ?? 0}</div>
         </Card>
 
         <Card className="p-6">
@@ -169,7 +180,7 @@ const DashboardTab = () => {
             <div className="text-sm text-muted-foreground">Total Upvotes Received</div>
             <Heart className="h-5 w-5 text-red-500" />
           </div>
-          <div className="text-3xl font-bold">256</div>
+          <div className="text-3xl font-bold">{stats?.upvotesReceived ?? 0}</div>
         </Card>
 
         <Card className="p-6">
@@ -177,7 +188,7 @@ const DashboardTab = () => {
             <div className="text-sm text-muted-foreground">Events You've Upvoted</div>
             <ThumbsUp className="h-5 w-5 text-blue-500" />
           </div>
-          <div className="text-3xl font-bold">42</div>
+          <div className="text-3xl font-bold">{stats?.upvotedEvents ?? 0}</div>
         </Card>
       </div>
 
@@ -185,43 +196,47 @@ const DashboardTab = () => {
       <Card className="p-6">
         <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
         <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-50 rounded-lg mt-1">
-              <ThumbsUp className="h-4 w-4 text-blue-600" />
+          {activities.map((activity) => (
+            <div key={activity._id} className="flex items-start gap-3">
+              <div className="p-2 bg-blue-50 rounded-lg mt-1">
+                {activity.type === 'upvote' && <ThumbsUp className="h-4 w-4 text-blue-600" />}
+                {activity.type === 'approval' && <CheckCircle className="h-4 w-4 text-green-600" />}
+                {activity.type === 'submission' && <Upload className="h-4 w-4 text-orange-600" />}
+              </div>
+              <div>
+                <p className="font-medium">{activity.message}</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-medium">You upvoted 'Lagos Tech Week'</p>
-              <p className="text-sm text-muted-foreground">2 hours ago</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-green-50 rounded-lg mt-1">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            </div>
-            <div>
-              <p className="font-medium">Your event 'AI in Fintech Summit' was approved</p>
-              <p className="text-sm text-muted-foreground">1 day ago</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-orange-50 rounded-lg mt-1">
-              <Upload className="h-4 w-4 text-orange-600" />
-            </div>
-            <div>
-              <p className="font-medium">You submitted 'DevFest Lagos 2024'</p>
-              <p className="text-sm text-muted-foreground">3 days ago</p>
-            </div>
-          </div>
+          ))}
         </div>
       </Card>
     </div>
   );
 };
 
+import { useEvents } from '../events/context';
 const MyEventsTab = () => {
+  const { events, setFilters, loading } = useEvents();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+
+  useEffect(() => {
+    if (filter === 'all') {
+      setFilters({ status: '' });
+    } else {
+      setFilters({ status: filter });
+    }
+  }, [filter, setFilters]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -259,25 +274,31 @@ const MyEventsTab = () => {
 
       {/* Events List */}
       <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="p-6">
+        {events.map((event) => (
+          <Card key={event._id} className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-bold text-lg">Lagos Tech Summit 2024</h3>
-                  <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
-                    PENDING
+                  <h3 className="font-bold text-lg">{event.title}</h3>
+                  <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                    event.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                    event.status === 'approved' ? 'bg-green-100 text-green-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {event.status.toUpperCase()}
                   </span>
                 </div>
                 <div className="text-sm text-muted-foreground mb-2">
-                  Oct 28, 2024 • Lagos, Nigeria
+                  {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {event.location}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  A premier tech conference bringing together innovators...
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {event.description}
                 </p>
               </div>
               <div className="flex gap-2 ml-4">
-                <Button variant="ghost" size="sm">View</Button>
+                <Link href={`/events/${event._id}`}>
+                  <Button variant="ghost" size="sm">View</Button>
+                </Link>
                 <Button variant="ghost" size="sm">Edit</Button>
               </div>
             </div>
