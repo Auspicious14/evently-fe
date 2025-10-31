@@ -51,7 +51,7 @@ export const AdminDashboard = () => {
     setFilters({ status: statusMap[filter], search: searchTerm });
   }, [filter, searchTerm, setFilters]);
 
-  const handleUpdateStatus = async (eventId, status) => {
+  const handleUpdateStatus = async (eventId: string, status: string) => {
     try {
       await apiClient.patch(`/events/${eventId}/status`, { status });
       toast.success(`Event ${status}`);
