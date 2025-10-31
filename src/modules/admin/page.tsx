@@ -48,7 +48,7 @@ export const AdminDashboard = () => {
       rejected: 'rejected',
       posted: 'posted'
     };
-    setFilters({ status: statusMap[filter], title: searchTerm });
+    setFilters({ status: statusMap[filter], search: searchTerm });
   }, [filter, searchTerm, setFilters]);
 
   const handleUpdateStatus = async (eventId, status) => {

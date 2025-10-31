@@ -6,7 +6,7 @@
   - Local:        http://localhost:3000
 
  ✓ Starting...
- ✓ Ready in 2.5s
+ ✓ Ready in 2.8s
  ○ Compiling /signup ...
- ✓ Compiled /signup in 5.9s (408 modules)
- GET /signup 200 in 6743ms
+ ✓ Compiled /signup in 5.7s (408 modules)
+ GET /signup 200 in 5956ms
