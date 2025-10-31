@@ -238,7 +238,7 @@ const DashboardTab = () => {
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">Category Breakdown</h2>
           <div className="space-y-3">
-            {categoryBreakdown?.map(cat => (
+            {categoryBreakdown?.map((cat: any) => (
               <div key={cat.category}>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="font-medium">{cat.category}</span>
@@ -257,7 +257,7 @@ const DashboardTab = () => {
       <Card className="p-6">
         <h2 className="text-xl font-bold mb-4">Top Performing Events</h2>
         <div className="space-y-4">
-          {topPerformingEvents?.map(event => (
+          {topPerformingEvents?.map((event: any) => (
             <div key={event.eventId} className="flex items-center justify-between">
               <div>
                 <Link href={`/events/${event.eventId}`}>
@@ -329,7 +329,7 @@ const MyEventsTab = () => {
 
       {/* Events List */}
       <div className="space-y-4">
-        {filteredEvents.map((event) => (
+        {filteredEvents.map((event: any) => (
           <Card key={event.eventId} className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
