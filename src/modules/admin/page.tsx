@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, ReactNode } from 'react';
+import { useEffect, useMemo, useState, ElementType } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/router';
 import { Card } from '@/components/ui/Card';
@@ -68,7 +68,7 @@ export const AdminDashboard = () => {
     );
   }
 
-  const StatCard = ({ title, value, icon}: { title: string, value: number, icon: ReactNode}) => (
+  const StatCard = ({ title, value, icon: Icon }: { title: string, value: number, icon: ElementType}) => (
     <Card className="p-4 md:p-6">
       <div className="flex items-center gap-4">
         <div className="p-3 bg-primary/10 rounded-lg">
