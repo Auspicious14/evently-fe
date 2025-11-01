@@ -68,7 +68,7 @@ export const AdminDashboard = () => {
     );
   }
 
-  const StatCard = ({ title, value, icon}: { title: string, value: number, icon: ReactNode) => (
+  const StatCard = ({ title, value, icon}: { title: string, value: number, icon: ReactNode}) => (
     <Card className="p-4 md:p-6">
       <div className="flex items-center gap-4">
         <div className="p-3 bg-primary/10 rounded-lg">
