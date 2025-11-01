@@ -10,15 +10,11 @@ import React, {
   useEffect,
 } from "react";
 import { apiClient } from "@/lib/api";
-
-interface IAdminStats {
-  pendingEvents: number;
-  approvedToday: number;
-  rejectedToday: number;
-}
+import { IAdminEvent, IAdminStatsOverview } from "./model";
 
 interface IAdminContext {
-  stats: IAdminStats | null;
+  stats: IAdminStatsOverview | null;
+  events: IAdminEvent[];
   loading: boolean;
   error: string | null;
   refetch: () => void;
@@ -27,7 +23,8 @@ interface IAdminContext {
 const AdminContext = createContext<IAdminContext | null>(null);
 
 export const AdminProvider = ({ children }: { children: ReactNode }) => {
-  const [stats, setStats] = useState<IAdminStats | null>(null);
+  const [stats, setStats] = useState<IAdminStatsOverview | null>(null);
+  const [events, setEvents] = useState<IAdminEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,11 +32,15 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient.get('/admin/stats');
-      setStats(response.data.data);
+      const [statsResponse, eventsResponse] = await Promise.all([
+        apiClient.get('/admin/stats/overview'),
+        apiClient.get('/admin/events'),
+      ]);
+      setStats(statsResponse.data);
+      setEvents(eventsResponse.data);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch admin stats.";
+        err instanceof Error ? err.message : "Failed to fetch admin data.";
       setError(errorMessage);
       console.error(err);
     } finally {
@@ -53,6 +54,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   const value = {
     stats,
+    events,
     loading,
     error,
     refetch: fetchData,
