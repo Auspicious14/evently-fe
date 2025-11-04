@@ -46,7 +46,7 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
     try {
       setLoading(true);
       const response = await getEvent(_id);
-      const eventData = response.data ? response.data : response;
+      const eventData = response;
       setEvent(eventData);
       setHasUpvoted(eventData.hasUpvoted || false);
     } catch (error: any) {
