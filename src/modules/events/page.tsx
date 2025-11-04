@@ -34,7 +34,7 @@ export const EventsPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [upvotingStates, setUpvotingStates] = useState<Record<string, boolean>>({});
   const [upvotedEvents, setUpvotedEvents] = useState<Record<string, boolean>>({});
-  const [shareModalOpen, setShareModalOpen] = useState<{show: boolean, _id?: any}>({show: false });
+  const [shareModalOpen, setShareModalOpen] = useState<{show: boolean, _id?: string}>({show: false });
   const currentEvent = events.find(e => e._id === shareModalOpen._id);
 const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent._id}` : '';
 
@@ -253,13 +253,13 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
 
       <Footer />
       {shareModalOpen.show && currentEvent && (
-        <ShareModal
-         isOpen={shareModalOpen.show}
-         onClose={() => setShareModalOpen({show: false})
-         eventTitle={event.title}
-         eventUrl={eventUrl}
-        />
-      )}
+  <ShareModal
+    isOpen={shareModalOpen.show}
+    onClose={() => setShareModalOpen({ show: false })} 
+    eventTitle={currentEvent.title}                   
+    eventUrl={eventUrl}
+  />
+)}
     </div>
   );
 }
