@@ -99,7 +99,7 @@ const SelectContent = React.forwardRef<
     </SelectPrimitive.Portal>
   );
 });
-SelectContent.displayName = SelectContent;
+SelectContent.displayName = "SelectContent";
 
 
 const SelectItem = React.forwardRef<
