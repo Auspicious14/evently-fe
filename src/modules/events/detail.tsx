@@ -10,6 +10,7 @@ import { Calendar, MapPin, ExternalLink, ArrowLeft, ArrowUp, Share2, Flag } from
 import { IEvent } from '@/modules/events/model';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useRouter } from 'next/router';
 
 const getCategoryGradient = (category: string) => {
   const gradients: Record<string, string> = {
@@ -26,13 +27,13 @@ const getCategoryGradient = (category: string) => {
   return gradients[category] || 'from-gray-400 to-gray-600';
 };
 
-import { useRouter } from 'next/router';
 export const EventDetailPage = ({ _id }: { _id: string }) => {
   const router = useRouter();
   const { getEvent, upvoteEvent, flagEvent } = useEvents();
   const [event, setEvent] = useState<IEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [similarEvents, setSimilarEvents] = useState<IEvent[]>([]);
+  const [upvoting, setUpvoting] = useState(false);
 
   useEffect(() => {
     if (_id) {
@@ -43,25 +44,35 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
   const loadEvent = async () => {
     try {
       setLoading(true);
-      const data = await getEvent(_id);
-      setEvent(data);
-      // TODO: Load similar events based on category
-    } catch (error) {
+      const response = await getEvent(_id);
+      const eventData = response.data ? response.data : response;
+      setEvent(eventData);
+    } catch (error: any) {
       console.error('Failed to load event:', error);
-      toast.error('Failed to load event details');
+      if (!error.message) {
+        toast.error('Failed to load event details');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleUpvote = async () => {
-    if (!event) return;
+    if (!event || upvoting) return;
+    
     try {
+      setUpvoting(true);
       await upvoteEvent(event._id);
       toast.success('Event upvoted!');
-      loadEvent();
-    } catch (error) {
-      toast.error('Failed to upvote event');
+      // Optimistically update the UI
+      setEvent(prev => prev ? { ...prev, upvotes: (prev.upvotes || 0) + 1 } : null);
+    } catch (error: any) {
+      // Don't show toast if error already shown by interceptor
+      if (!error.message) {
+        toast.error('Failed to upvote event');
+      }
+    } finally {
+      setUpvoting(false);
     }
   };
 
@@ -70,8 +81,10 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
     try {
       await flagEvent(event._id);
       toast.success('Event reported');
-    } catch (error) {
-      toast.error('Failed to report event');
+    } catch (error: any) {
+      if (!error.message) {
+        toast.error('Failed to report event');
+      }
     }
   };
 
@@ -259,11 +272,21 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
                 <div className="space-y-4">
                   <Button
                     onClick={handleUpvote}
+                    disabled={upvoting}
                     className="w-full bg-orange-50 text-orange-600 hover:bg-orange-100 border border-orange-200"
                     size="lg"
                   >
-                    <ArrowUp className="mr-2 h-5 w-5" />
-                    Upvote ({event.upvotes || 0})
+                    {upvoting ? (
+                      <>
+                        <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-orange-600 border-t-transparent"></div>
+                        Upvoting...
+                      </>
+                    ) : (
+                      <>
+                        <ArrowUp className="mr-2 h-5 w-5" />
+                        Upvote ({event.upvotes || 0})
+                      </>
+                    )}
                   </Button>
 
                   <Button
@@ -285,7 +308,7 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
                   <div className="pt-4 border-t space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Views</span>
-                      <span className="font-medium">15.4k</span>
+                      <span className="font-medium">{event.views || 0}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Upvotes</span>
@@ -293,7 +316,7 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Going</span>
-                      <span className="font-medium">876</span>
+                      <span className="font-medium">{event.goingCount || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -339,4 +362,4 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
       <Footer />
     </div>
   );
-                }
+};
