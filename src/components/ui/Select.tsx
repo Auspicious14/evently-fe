@@ -32,9 +32,6 @@ const SelectTrigger = React.forwardRef<
 ));
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
-// ──────────────────────────────────────────────────────────────
-// Searchable Content
-// ──────────────────────────────────────────────────────────────
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & {
@@ -44,11 +41,10 @@ const SelectContent = React.forwardRef<
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
 
-  // Filter children based on search
   const filteredChildren = React.useMemo(() => {
     if (!search) return children;
 
-    return React.Children.toArray(children).filter((child) => {
+    return React.Children.toArray(children).filter((child: any) => {
       if (React.isValidElement(child) && child.type === SelectItem) {
         const label = (child.props.children as string) ?? "";
         return label.toLowerCase().includes(search.toLowerCase());
