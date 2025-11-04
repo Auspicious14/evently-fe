@@ -33,23 +33,26 @@ const SelectTrigger = React.forwardRef<
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectContent = React.forwardRef<
+const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & {
     searchPlaceholder?: string;
   }
 >(({ className, children, position = "popper", searchPlaceholder = "Search..." }, ref) => {
   const [search, setSearch] = React.useState("");
-  const [open, setOpen] = React.useState(false);
 
+  // Type-safe filtering
   const filteredChildren = React.useMemo(() => {
     if (!search) return children;
 
-    return React.Children.toArray(children).filter((child: any) => {
-      if (React.isValidElement(child) && child.type === SelectItem) {
-        const label = (child.props.children as string) ?? "";
-        return label.toLowerCase().includes(search.toLowerCase());
-      }
-      return true;
+    return React.Children.toArray(children).filter((child) => {
+      if (!React.isValidElement(child)) return false;
+      if (child.type !== SelectItem) return true; // Keep non-items (like SelectLabel)
+
+      // Type guard for SelectItem props
+      const itemProps = child.props as React.ComponentProps<typeof SelectItem>;
+      const label = (itemProps.children as string | undefined) ?? "";
+      return label.toLowerCase().includes(search.toLowerCase());
     });
   }, [children, search]);
 
