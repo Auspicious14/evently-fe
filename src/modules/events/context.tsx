@@ -32,6 +32,7 @@ interface IEventsContext {
   hasMore: boolean;
   getEvent: (id: string) => Promise<IEvent & { hasUpvoted?: boolean }>;
   upvoteEvent: (id: string) => Promise<void>;
+  removeUpvoteEvent: (id: string) => Promise<void>;
   flagEvent: (id: string) => Promise<void>;
 }
 
@@ -122,7 +123,6 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   const getEvent = useCallback(async (id: string): Promise<IEvent & { hasUpvoted?: boolean }> => {
     try {
       const { data } = await apiClient.get(`/events/${id}`);
-      // Handle both response formats
       return data.data ? data.data : data;
     } catch (error: any) {
       throw error;
@@ -135,6 +135,17 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       if (error.message?.includes('already upvoted')) {
         toast.info('You have already upvoted this event');
+      }
+      throw error;
+    }
+  }, []);
+
+  const removeUpvoteEvent = useCallback(async (id: string) => {
+    try {
+      await apiClient.delete(`/events/${id}/upvote`);
+    } catch (error: any) {
+      if (error.message?.includes('not upvoted')) {
+        toast.info('You have not upvoted this event');
       }
       throw error;
     }
@@ -159,6 +170,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     hasMore,
     getEvent,
     upvoteEvent,
+    removeUpvoteEvent,
     flagEvent,
   };
 
