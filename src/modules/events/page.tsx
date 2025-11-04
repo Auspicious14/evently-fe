@@ -219,7 +219,7 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
                       </button>
 
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShareModalOpen({show: true, _id: event?._id})>
+                        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShareModalOpen({show: true, _id: event._id})>
                           <Share2 className="h-4 w-4" />
                         </Button>
                         <Link href={`/events/${event._id}`}>
@@ -253,13 +253,13 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
 
       <Footer />
       {shareModalOpen.show && currentEvent && (
-  <ShareModal
-    isOpen={shareModalOpen.show}
-    onClose={() => setShareModalOpen({ show: false })} 
-    eventTitle={currentEvent.title}                   
-    eventUrl={eventUrl}
-  />
-)}
+        <ShareModal
+          isOpen={shareModalOpen.show}
+          onClose={() => setShareModalOpen({ show: false })}
+          eventTitle={currentEvent.title}
+          eventUrl={eventUrl}
+        />
+      )}
     </div>
   );
 }
