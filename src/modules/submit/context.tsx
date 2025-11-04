@@ -1,57 +1,58 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { IEventInput } from './model';
-import { apiClient } from '@/lib/api';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { apiClient } from "@/lib/api";
+import { toast } from "sonner";
 
-// Define the shape of the context value
 interface ISubmitContext {
   isSubmitting: boolean;
   error: string | null;
   success: boolean;
-  submitEvent: (eventData: FormData) => Promise<void>;
+  submitEvent: (formData: FormData) => Promise<void>;
   resetState: () => void;
 }
 
 const SubmitContext = createContext<ISubmitContext | null>(null);
 
 export const SubmitProvider = ({ children }: { children: ReactNode }) => {
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
+  const [success, setSuccess] = useState(false);
 
-  const submitEvent = useCallback(async (eventData: FormData) => {
+  const submitEvent = async (formData: FormData) => {
     setIsSubmitting(true);
     setError(null);
     setSuccess(false);
+
     try {
-      await apiClient.post('/events', eventData);
-      setSuccess(true);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      const response = await apiClient.post("/events", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data && response.data.success) {
+        setSuccess(true);
+      } else {
+        throw new Error("Failed to submit event");
+      }
+    } catch (err: any) {
+      const errorMessage = err.message || "An unknown error occurred";
       setError(errorMessage);
-      console.error(err);
     } finally {
       setIsSubmitting(false);
     }
-  }, []);
+  };
 
-  const resetState = useCallback(() => {
+  const resetState = () => {
     setError(null);
     setSuccess(false);
-    setIsSubmitting(false);
-  }, []);
-
-  const value = {
-    isSubmitting,
-    error,
-    success,
-    submitEvent,
-    resetState,
   };
 
   return (
-    <SubmitContext.Provider value={value}>
+    <SubmitContext.Provider
+      value={{ isSubmitting, error, success, submitEvent, resetState }}
+    >
       {children}
     </SubmitContext.Provider>
   );
@@ -60,7 +61,7 @@ export const SubmitProvider = ({ children }: { children: ReactNode }) => {
 export const useSubmit = () => {
   const context = useContext(SubmitContext);
   if (!context) {
-    throw new Error('useSubmit must be used within a SubmitProvider');
+    throw new Error("useSubmit must be used within a SubmitProvider");
   }
   return context;
 };
