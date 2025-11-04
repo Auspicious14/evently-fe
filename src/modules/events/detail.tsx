@@ -29,11 +29,12 @@ const getCategoryGradient = (category: string) => {
 
 export const EventDetailPage = ({ _id }: { _id: string }) => {
   const router = useRouter();
-  const { getEvent, upvoteEvent, flagEvent } = useEvents();
+  const { getEvent, upvoteEvent, removeUpvoteEvent, flagEvent } = useEvents();
   const [event, setEvent] = useState<IEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [similarEvents, setSimilarEvents] = useState<IEvent[]>([]);
   const [upvoting, setUpvoting] = useState(false);
+  const [hasUpvoted, setHasUpvoted] = useState(false);
 
   useEffect(() => {
     if (_id) {
@@ -47,6 +48,7 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
       const response = await getEvent(_id);
       const eventData = response.data ? response.data : response;
       setEvent(eventData);
+      setHasUpvoted(eventData.hasUpvoted || false);
     } catch (error: any) {
       console.error('Failed to load event:', error);
       if (!error.message) {
@@ -57,19 +59,29 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
     }
   };
 
-  const handleUpvote = async () => {
+  const handleUpvoteToggle = async () => {
     if (!event || upvoting) return;
     
     try {
       setUpvoting(true);
-      await upvoteEvent(event._id);
-      toast.success('Event upvoted!');
-      // Optimistically update the UI
-      setEvent(prev => prev ? { ...prev, upvotes: (prev.upvotes || 0) + 1 } : null);
+      
+      if (hasUpvoted) {
+        // Remove upvote
+        await removeUpvoteEvent(event._id);
+        toast.success('Upvote removed');
+        setHasUpvoted(false);
+        setEvent(prev => prev ? { ...prev, upvotes: Math.max(0, (prev.upvotes || 0) - 1) } : null);
+      } else {
+        // Add upvote
+        await upvoteEvent(event._id);
+        toast.success('Event upvoted!');
+        setHasUpvoted(true);
+        setEvent(prev => prev ? { ...prev, upvotes: (prev.upvotes || 0) + 1 } : null);
+      }
     } catch (error: any) {
-      // Don't show toast if error already shown by interceptor
-      if (!error.message) {
-        toast.error('Failed to upvote event');
+      // Revert optimistic update on error
+      if (!error.message?.includes('already upvoted')) {
+        // Error already shown by interceptor for most cases
       }
     } finally {
       setUpvoting(false);
@@ -271,20 +283,24 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
               <Card className="p-6 sticky top-24">
                 <div className="space-y-4">
                   <Button
-                    onClick={handleUpvote}
+                    onClick={handleUpvoteToggle}
                     disabled={upvoting}
-                    className="w-full bg-orange-50 text-orange-600 hover:bg-orange-100 border border-orange-200"
+                    className={`w-full border transition-all ${
+                      hasUpvoted
+                        ? 'bg-orange-500 text-white hover:bg-orange-600 border-orange-500'
+                        : 'bg-orange-50 text-orange-600 hover:bg-orange-100 border-orange-200'
+                    }`}
                     size="lg"
                   >
                     {upvoting ? (
                       <>
-                        <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-orange-600 border-t-transparent"></div>
-                        Upvoting...
+                        <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                        {hasUpvoted ? 'Removing...' : 'Upvoting...'}
                       </>
                     ) : (
                       <>
-                        <ArrowUp className="mr-2 h-5 w-5" />
-                        Upvote ({event.upvotes || 0})
+                        <ArrowUp className={`mr-2 h-5 w-5 ${hasUpvoted ? 'fill-current' : ''}`} />
+                        {hasUpvoted ? 'Upvoted' : 'Upvote'} ({event.upvotes || 0})
                       </>
                     )}
                   </Button>
