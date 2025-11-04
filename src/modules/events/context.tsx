@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, {
@@ -11,6 +10,7 @@ import React, {
 } from "react";
 import { IEvent, Category } from "./model";
 import { apiClient } from "@/lib/api";
+import { toast } from "sonner";
 
 interface IEventFilters {
   search: string;
@@ -30,7 +30,7 @@ interface IEventsContext {
   refetchEvents: () => void;
   loadMore: () => void;
   hasMore: boolean;
-  getEvent: (id: string) => Promise<IEvent>;
+  getEvent: (id: string) => Promise<IEvent & { hasUpvoted?: boolean }>;
   upvoteEvent: (id: string) => Promise<void>;
   flagEvent: (id: string) => Promise<void>;
 }
@@ -119,26 +119,34 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [loading, hasMore, skip, filters, fetchEvents, limit]);
 
-  const getEvent = useCallback(async (id: string) => {
-    const { data } = await apiClient.get<IEvent>(`/events/${id}`);
-    return data;
+  const getEvent = useCallback(async (id: string): Promise<IEvent & { hasUpvoted?: boolean }> => {
+    try {
+      const { data } = await apiClient.get(`/events/${id}`);
+      // Handle both response formats
+      return data.data ? data.data : data;
+    } catch (error: any) {
+      throw error;
+    }
   }, []);
 
-  const upvoteEvent = useCallback(
-    async (id: string) => {
+  const upvoteEvent = useCallback(async (id: string) => {
+    try {
       await apiClient.patch(`/events/${id}/upvote`);
-      refetchEvents();
-    },
-    [refetchEvents]
-  );
+    } catch (error: any) {
+      if (error.message?.includes('already upvoted')) {
+        toast.info('You have already upvoted this event');
+      }
+      throw error;
+    }
+  }, []);
 
-  const flagEvent = useCallback(
-    async (id: string) => {
+  const flagEvent = useCallback(async (id: string) => {
+    try {
       await apiClient.patch(`/events/${id}/flag`);
-      refetchEvents();
-    },
-    [refetchEvents]
-  );
+    } catch (error: any) {
+      throw error;
+    }
+  }, []);
 
   const value = {
     events,
