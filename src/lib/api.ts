@@ -43,15 +43,32 @@ apiClient.interceptors.response.use(
       normalizedError.message = error.message;
     }
 
+    // Handle 401 Unauthorized
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("authToken");
         toast.error("Session expired. Please login again.");
-        // window.location.href = "/auth/login";
       }
     }
-
-    if (normalizedError.message) {
+    // (these are likely navigation to non-existent pages)
+    else if (error.response?.status === 404) {
+      // Only show toast for non-GET requests or explicit API calls
+      if (error.config?.method !== 'get') {
+        toast.error(normalizedError.message);
+      }
+    }
+    // Handle 403 Forbidden - only show for actual forbidden resources, not missing pages
+    else if (error.response?.status === 403) {
+    
+      const isApiCall = error.config?.url?.startsWith('/api') || 
+                        error.config?.baseURL?.includes('localhost:12000');
+      
+      if (isApiCall && normalizedError.message) {
+        toast.error(normalizedError.message);
+      }
+    }
+  
+    else if (normalizedError.message && error.response?.status !== 404) {
       toast.error(normalizedError.message);
     }
 
