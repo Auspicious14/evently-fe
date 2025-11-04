@@ -23,6 +23,8 @@ export interface IEvent {
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
   imageUrls?: string[];
+  upvotedBy?: string[];
+  hasUpvoted?: boolean;
 }
 
 export enum Category {
