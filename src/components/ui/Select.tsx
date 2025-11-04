@@ -70,7 +70,7 @@ const SelectContent = React.forwardRef<
           className
         )}
         position={position}
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <Command className="flex flex-col">
           {/* Search Input */}
@@ -81,6 +81,7 @@ const SelectContent = React.forwardRef<
               className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
               value={search}
               onValueChange={setSearch}
+              autoFocus
             />
           </div>
 
