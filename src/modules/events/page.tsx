@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEvents } from '@/modules/events/context';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -55,6 +55,7 @@ export const EventsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [upvotingStates, setUpvotingStates] = useState<Record<string, boolean>>({});
+  const [upvotedEvents, setUpvotedEvents] = useState<Record<string, boolean>>({});
   const [shareModalOpen, setShareModalOpen] = useState<{ show: boolean; _id?: string }>({
     show: false,
   });
@@ -63,6 +64,14 @@ export const EventsPage = () => {
   const eventUrl = currentEvent
     ? `${window.location.origin}/events/${currentEvent._id}`
     : '';
+
+  useEffect(() => {
+    const map: Record<string, boolean> = {};
+    events.forEach(ev => {
+      map[ev._id] = !!ev.hasUpvoted;
+    });
+    setUpvotedEvents(map);
+  }, [events]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,12 +87,14 @@ export const EventsPage = () => {
       if (currentlyUpvoted) {
         await removeUpvoteEvent(eventId);
         toast.success('Upvote removed');
+        setUpvotedEvents(prev => ({ ...prev, [eventId]: false }));
       } else {
         await upvoteEvent(eventId);
         toast.success('Event upvoted!');
+        setUpvotedEvents(prev => ({ ...prev, [eventId]: true }));
       }
-    } catch (err) {
-      toast.error('Failed to update upvote');
+    } catch (error: any) {
+      toast.error('Something went wrong');
     } finally {
       setUpvotingStates(prev => ({ ...prev, [eventId]: false }));
     }
@@ -94,6 +105,7 @@ export const EventsPage = () => {
       <Header />
 
       <main className="flex-grow bg-gray-50">
+       
         <div className="bg-white border-b sticky top-14 z-40">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-3">
@@ -106,9 +118,6 @@ export const EventsPage = () => {
                     className="h-11 pl-4"
                   />
                 </div>
-                <Button type="submit" className="h-11 px-6 hidden md:flex">
-                  Search
-                </Button>
               </form>
 
               <Button
@@ -129,13 +138,14 @@ export const EventsPage = () => {
                   onChange={(e) => setFilters({ category: e.target.value as Category | '' })}
                   value={filters.category || ''}
                 >
-                  <option value="">All Categories</option>
+                  <option value="">Sort by: Date</option>
                   {Object.values(Category).map((cat) => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
               </div>
             </div>
+
 
             {showFilters && (
               <div className="mt-4 p-4 bg-gray-50 rounded-lg md:hidden">
@@ -176,15 +186,17 @@ export const EventsPage = () => {
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => {
-              const isUpvoted = !!event.hasUpvoted; // Direct from context
+              const isUpvoted = upvotedEvents[event._id] ?? event.hasUpvoted ?? false;
               const isUpvoting = upvotingStates[event._id] || false;
               const hasImage = !!event.imageUrls?.[0];
 
               return (
                 <Card key={event._id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  {/* Image or Gradient Header */}
+                  
                   <div
-                    className={`relative h-48 ${hasImage ? '' : getCategoryGradient(event.category)} flex items-end p-4`}
+                    className={`relative h-48 ${
+                      hasImage ? '' : getCategoryGradient(event.category)
+                    } flex items-end p-4`}
                     style={getHeaderStyle(event.imageUrls?.[0])}
                   >
                     {hasImage && <div className="absolute inset-0 bg-black/40" />}
@@ -200,7 +212,7 @@ export const EventsPage = () => {
                       )}
                     </div>
                   </div>
-
+                  
                   <div className="p-4">
                     <h3 className="font-bold text-lg mb-2 line-clamp-2 hover:text-primary">
                       <Link href={`/events/${event._id}`}>{event.title}</Link>
@@ -230,6 +242,7 @@ export const EventsPage = () => {
                       </p>
                     )}
 
+                    {/* Actions */}
                     <div className="flex items-center justify-between">
                       <button
                         onClick={() => handleUpvoteToggle(event._id, isUpvoted)}
@@ -241,7 +254,7 @@ export const EventsPage = () => {
                         }`}
                       >
                         {isUpvoting ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
                         ) : (
                           <ArrowUp className={`h-4 w-4 ${isUpvoted ? 'fill-current' : ''}`} />
                         )}
@@ -278,7 +291,7 @@ export const EventsPage = () => {
                 size="lg"
                 className="bg-blue-50 text-blue-600 hover:bg-blue-100"
               >
-                {loading ? 'Loading...' : 'Load More'}
+                Load More
               </Button>
             </div>
           )}
@@ -286,7 +299,7 @@ export const EventsPage = () => {
       </main>
 
       <Footer />
-      
+
       {shareModalOpen.show && currentEvent && (
         <ShareModal
           isOpen={shareModalOpen.show}
