@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, {
@@ -24,7 +23,7 @@ interface IDashboardContext {
   overview: DashboardOverviewDto | null;
   loading: boolean;
   error: string | null;
-  fetchData: () => void;
+  fetchData: () => Promise<void>;
 }
 
 const DashboardContext = createContext<IDashboardContext | null>(null);
@@ -39,9 +38,11 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     if (!user) {
       setLoading(false);
       return;
-    };
+    }
+    
     setLoading(true);
     setError(null);
+    
     try {
       const response = await apiClient.get('/dashboard/overview');
       setOverview(response.data);
@@ -55,13 +56,19 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [user]); 
 
   const value = {
     overview,
     loading,
     error,
     fetchData,
-    
   };
 
   return (
