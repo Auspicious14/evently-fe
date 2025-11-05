@@ -29,7 +29,7 @@ export const SubmitProvider = ({ children }: { children: ReactNode }) => {
         //headers: {
          // "Content-Type": "multipart/form-data",
         //},
-        transformRequest: [(data) => data],
+        //transformRequest: [(data) => data],
       });
 
       if (response.data && response.data.success) {
