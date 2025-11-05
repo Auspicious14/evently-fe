@@ -11,7 +11,7 @@ import { Calendar, MapPin, ArrowUp, Share2, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { Category } from '@/modules/events/model';
 import { toast } from 'sonner';
-import { ShareModal } from '@/modules/events/components/ShareModal'
+import { ShareModal } from '@/modules/events/components/ShareModal';
 
 const getCategoryGradient = (category: string) => {
   const gradients: Record<string, string> = {
@@ -28,16 +28,41 @@ const getCategoryGradient = (category: string) => {
   return gradients[category] || 'gradient-default';
 };
 
+const getHeaderStyle = (imageUrl?: string): React.CSSProperties => {
+  if (imageUrl) {
+    return {
+      backgroundImage: `url(${imageUrl})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    };
+  }
+  return {};
+};
+
 export const EventsPage = () => {
-  const { events, loading, error, loadMore, hasMore, filters, setFilters, upvoteEvent, removeUpvoteEvent } = useEvents();
+  const {
+    events,
+    loading,
+    error,
+    loadMore,
+    hasMore,
+    filters,
+    setFilters,
+    upvoteEvent,
+    removeUpvoteEvent,
+  } = useEvents();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [upvotingStates, setUpvotingStates] = useState<Record<string, boolean>>({});
-  const [upvotedEvents, setUpvotedEvents] = useState<Record<string, boolean>>({});
-  const [shareModalOpen, setShareModalOpen] = useState<{show: boolean, _id?: string}>({show: false });
-  const currentEvent = events.find(e => e._id === shareModalOpen._id);
-const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent._id}` : '';
+  const [shareModalOpen, setShareModalOpen] = useState<{ show: boolean; _id?: string }>({
+    show: false,
+  });
 
+  const currentEvent = events.find(e => e._id === shareModalOpen._id);
+  const eventUrl = currentEvent
+    ? `${window.location.origin}/events/${currentEvent._id}`
+    : '';
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,13 +78,12 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
       if (currentlyUpvoted) {
         await removeUpvoteEvent(eventId);
         toast.success('Upvote removed');
-        setUpvotedEvents(prev => ({ ...prev, [eventId]: false }));
       } else {
         await upvoteEvent(eventId);
         toast.success('Event upvoted!');
-        setUpvotedEvents(prev => ({ ...prev, [eventId]: true }));
       }
-    } catch (error: any) {
+    } catch (err) {
+      toast.error('Failed to update upvote');
     } finally {
       setUpvotingStates(prev => ({ ...prev, [eventId]: false }));
     }
@@ -68,9 +92,8 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      
+
       <main className="flex-grow bg-gray-50">
-        {/* Search Section */}
         <div className="bg-white border-b sticky top-14 z-40">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-3">
@@ -83,8 +106,11 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
                     className="h-11 pl-4"
                   />
                 </div>
+                <Button type="submit" className="h-11 px-6 hidden md:flex">
+                  Search
+                </Button>
               </form>
-              
+
               <Button
                 variant="outline"
                 size="icon"
@@ -103,7 +129,7 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
                   onChange={(e) => setFilters({ category: e.target.value as Category | '' })}
                   value={filters.category || ''}
                 >
-                  <option value="">Sort by: Date</option>
+                  <option value="">All Categories</option>
                   {Object.values(Category).map((cat) => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
@@ -111,7 +137,6 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
               </div>
             </div>
 
-            {/* Mobile Filters */}
             {showFilters && (
               <div className="mt-4 p-4 bg-gray-50 rounded-lg md:hidden">
                 <select
@@ -129,7 +154,6 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
           </div>
         </div>
 
-        {/* Events Grid */}
         <div className="container mx-auto px-4 py-8">
           {loading && events.length === 0 && (
             <div className="text-center py-12">
@@ -152,14 +176,20 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => {
-              const isUpvoted = upvotedEvents[event._id] ?? event.hasUpvoted ?? false;
+              const isUpvoted = !!event.hasUpvoted; // Direct from context
               const isUpvoting = upvotingStates[event._id] || false;
+              const hasImage = !!event.imageUrls?.[0];
 
               return (
                 <Card key={event._id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  {/* Gradient Header */}
-                  <div className={`h-48 ${getCategoryGradient(event.category)} flex items-end p-4`}>
-                    <div className="flex gap-2">
+                  {/* Image or Gradient Header */}
+                  <div
+                    className={`relative h-48 ${hasImage ? '' : getCategoryGradient(event.category)} flex items-end p-4`}
+                    style={getHeaderStyle(event.imageUrls?.[0])}
+                  >
+                    {hasImage && <div className="absolute inset-0 bg-black/40" />}
+
+                    <div className="relative flex gap-2">
                       <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium text-white">
                         {event.category}
                       </span>
@@ -171,7 +201,6 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
                     </div>
                   </div>
 
-                  {/* Content */}
                   <div className="p-4">
                     <h3 className="font-bold text-lg mb-2 line-clamp-2 hover:text-primary">
                       <Link href={`/events/${event._id}`}>{event.title}</Link>
@@ -180,12 +209,14 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
                     <div className="space-y-2 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 flex-shrink-0" />
-                        <span>{new Date(event.date).toLocaleDateString('en-US', {
-                          weekday: 'short',
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}</span>
+                        <span>
+                          {new Date(event.date).toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 flex-shrink-0" />
@@ -199,7 +230,6 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
                       </p>
                     )}
 
-                    {/* Actions */}
                     <div className="flex items-center justify-between">
                       <button
                         onClick={() => handleUpvoteToggle(event._id, isUpvoted)}
@@ -211,7 +241,7 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
                         }`}
                       >
                         {isUpvoting ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                         ) : (
                           <ArrowUp className={`h-4 w-4 ${isUpvoted ? 'fill-current' : ''}`} />
                         )}
@@ -219,7 +249,12 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
                       </button>
 
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShareModalOpen({show: true, _id: event._id})}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9"
+                          onClick={() => setShareModalOpen({ show: true, _id: event._id })}
+                        >
                           <Share2 className="h-4 w-4" />
                         </Button>
                         <Link href={`/events/${event._id}`}>
@@ -235,7 +270,6 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
             })}
           </div>
 
-          {/* Load More */}
           {!loading && hasMore && (
             <div className="text-center mt-8">
               <Button
@@ -244,7 +278,7 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
                 size="lg"
                 className="bg-blue-50 text-blue-600 hover:bg-blue-100"
               >
-                Load More
+                {loading ? 'Loading...' : 'Load More'}
               </Button>
             </div>
           )}
@@ -252,6 +286,7 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
       </main>
 
       <Footer />
+      
       {shareModalOpen.show && currentEvent && (
         <ShareModal
           isOpen={shareModalOpen.show}
@@ -262,4 +297,4 @@ const eventUrl = currentEvent ? `${window.location.origin}/events/${currentEvent
       )}
     </div>
   );
-}
+};
