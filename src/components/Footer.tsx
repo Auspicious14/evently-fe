@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Calendar } from 'lucide-react';
+import Image from 'next/image;
 
 const Footer = () => {
   return (
@@ -11,10 +12,10 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-white" />
-              </div>
-              <span className="font-bold text-xl">EventNaija</span>
+              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">  
+            <Image src="/EventNaija-logo.png" alt="logo" width={100} height={100} />
+             </div>
+              { /* <span className="font-bold text-xl">EventNaija</span> */}
             </Link>
             <p className="text-sm text-muted-foreground mb-4">
               The central hub for tech events in Nigeria.
