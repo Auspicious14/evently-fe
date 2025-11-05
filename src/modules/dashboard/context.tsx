@@ -16,20 +16,24 @@ import {
   ActivityTimelineDto,
   EventPerformanceDto,
   CategoryBreakdownDto,
-  ActivityTrendDto
+  ActivityTrendDto,
+  IUpvotedEvent
 } from "./model";
 
 interface IDashboardContext {
   overview: DashboardOverviewDto | null;
+  upvotedEvents: IUpvotedEvent[];
   loading: boolean;
   error: string | null;
   fetchData: () => Promise<void>;
+  fetchUpvotedEvents: () => Promise<void>;
 }
 
 const DashboardContext = createContext<IDashboardContext | null>(null);
 
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [overview, setOverview] = useState<DashboardOverviewDto | null>(null);
+  const [upvotedEvents, setUpvotedEvents] = useState<IUpvotedEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -56,6 +60,20 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
+  const fetchUpvotedEvents = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { data } = await apiClient.get<IUpvotedEvent[]>('/dashboard/upvoted-events');
+      setUpvotedEvents(data);
+    } catch (error) {
+      console.error(error);
+      setError("Unable to fetch upvoted events");
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (user) {
       fetchData();
@@ -66,9 +84,11 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
   const value = {
     overview,
+    upvotedEvents,
     loading,
     error,
     fetchData,
+    fetchUpvotedEvents,
   };
 
   return (

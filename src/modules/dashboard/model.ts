@@ -53,3 +53,5 @@ export interface DashboardOverviewDto {
   categoryBreakdown: CategoryBreakdownDto[];
   activityTrend: ActivityTrendDto[];
 }
+
+export interface IUpvotedEvent extends EventPerformanceDto {}
