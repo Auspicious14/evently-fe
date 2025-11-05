@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -146,6 +145,14 @@ const DashboardTab = () => {
   const { user } = useAuth();
   const { overview, loading } = useDashboard();
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   const { stats, recentActivity, topPerformingEvents, categoryBreakdown } = overview ?? {};
 
   const getActivityMessage = (activity: any) => {
@@ -207,84 +214,91 @@ const DashboardTab = () => {
         {/* Recent Activity */}
         <Card className="p-6 lg:col-span-2">
           <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
-          <div className="space-y-4">
-            {recentActivity?.map((activity: any) => (
-              <div key={activity.date.toString()} className="flex items-start gap-3">
-                <div className="p-2 bg-blue-50 rounded-lg mt-1">
-                  {activity.activityType.includes('upvote') && <ThumbsUp className="h-4 w-4 text-blue-600" />}
-                  {activity.activityType.includes('approve') && <CheckCircle className="h-4 w-4 text-green-600" />}
-                  {activity.activityType.includes('create') && <Upload className="h-4 w-4 text-orange-600" />}
+          {!recentActivity || recentActivity.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No recent activity</p>
+          ) : (
+            <div className="space-y-4">
+              {recentActivity.map((activity: any, index: number) => (
+                <div key={index} className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-50 rounded-lg mt-1">
+                    {activity.activityType.includes('upvote') && <ThumbsUp className="h-4 w-4 text-blue-600" />}
+                    {activity.activityType.includes('approve') && <CheckCircle className="h-4 w-4 text-green-600" />}
+                    {activity.activityType.includes('create') && <Upload className="h-4 w-4 text-orange-600" />}
+                  </div>
+                  <div>
+                    <p className="font-medium">{getActivityMessage(activity)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatDistanceToNow(new Date(activity.date), { addSuffix: true })}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium">{getActivityMessage(activity)}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatDistanceToNow(new Date(activity.date), { addSuffix: true })}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         {/* Category Breakdown */}
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">Category Breakdown</h2>
-          <div className="space-y-3">
-            {categoryBreakdown?.map((cat: any) => (
-              <div key={cat.category}>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="font-medium">{cat.category}</span>
-                  <span className="text-muted-foreground">{cat.percentage}%</span>
+          {!categoryBreakdown || categoryBreakdown.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No data yet</p>
+          ) : (
+            <div className="space-y-3">
+              {categoryBreakdown.map((cat: any) => (
+                <div key={cat.category}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="font-medium">{cat.category}</span>
+                    <span className="text-muted-foreground">{cat.percentage}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-primary h-2 rounded-full" style={{ width: `${cat.percentage}%` }}></div>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: `${cat.percentage}%` }}></div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
 
       {/* Top Performing Events */}
       <Card className="p-6">
         <h2 className="text-xl font-bold mb-4">Top Performing Events</h2>
-        <div className="space-y-4">
-          {topPerformingEvents?.map((event: any) => (
-            <div key={event.eventId} className="flex items-center justify-between">
-              <div>
-                <Link href={`/events/${event.eventId}`}>
-                  <h3 className="font-semibold hover:underline">{event.title}</h3>
-                </Link>
-                <p className="text-sm text-muted-foreground">{event.location} • {format(new Date(event.date), 'MMM dd, yyyy')}</p>
+        {!topPerformingEvents || topPerformingEvents.length === 0 ? (
+          <p className="text-muted-foreground text-center py-8">No events yet</p>
+        ) : (
+          <div className="space-y-4">
+            {topPerformingEvents.map((event: any) => (
+              <div key={event.eventId} className="flex items-center justify-between">
+                <div>
+                  <Link href={`/events/${event.eventId}`}>
+                    <h3 className="font-semibold hover:underline">{event.title}</h3>
+                  </Link>
+                  <p className="text-sm text-muted-foreground">{event.location} • {format(new Date(event.date), 'MMM dd, yyyy')}</p>
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1"><Heart className="h-4 w-4 text-red-500" /> {event.upvotes}</div>
+                  <div className="flex items-center gap-1"><TrendingUp className="h-4 w-4 text-green-500" /> {event.views}</div>
+                </div>
               </div>
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1"><Heart className="h-4 w-4 text-red-500" /> {event.upvotes}</div>
-                <div className="flex items-center gap-1"><TrendingUp className="h-4 w-4 text-green-500" /> {event.views}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </Card>
     </div>
   );
 };
 
 const MyEventsTab = () => {
-  const { overview, loading, fetchData } = useDashboard();
+  const { overview, loading } = useDashboard();
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  
   const filteredEvents: any = overview?.topPerformingEvents?.filter(event =>
     filter === 'all' || event.status === filter
   ) ?? [];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
@@ -325,39 +339,44 @@ const MyEventsTab = () => {
       </div>
 
       {/* Events List */}
-      <div className="space-y-4">
-        {filteredEvents.map((event: any) => (
-          <Card key={event.eventId} className="p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-bold text-lg">{event.title}</h3>
-                  <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                    event.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                    event.status === 'approved' ? 'bg-green-100 text-green-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {event.status.toUpperCase()}
-                  </span>
+      {filteredEvents.length === 0 ? (
+        <Card className="p-12">
+          <p className="text-center text-muted-foreground">No events found</p>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {filteredEvents.map((event: any) => (
+            <Card key={event.eventId} className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="font-bold text-lg">{event.title}</h3>
+                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                      event.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                      event.status === 'approved' ? 'bg-green-100 text-green-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {event.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="text-sm text-muted-foreground mb-2">
+                    {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {event.location}
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span><Heart className="inline h-4 w-4 mr-1"/>{event.upvotes} Upvotes</span>
+                    <span><TrendingUp className="inline h-4 w-4 mr-1"/>{event.views} Views</span>
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground mb-2">
-                  {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {event.location}
-                </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span><Heart className="inline h-4 w-4 mr-1"/>{event.upvotes} Upvotes</span>
-                  <span><TrendingUp className="inline h-4 w-4 mr-1"/>{event.views} Views</span>
+                <div className="flex gap-2 ml-4">
+                  <Link href={`/events/${event.eventId}`}>
+                    <Button variant="ghost" size="sm">View</Button>
+                  </Link>
                 </div>
               </div>
-              <div className="flex gap-2 ml-4">
-                <Link href={`/events/${event.eventId}`}>
-                  <Button variant="ghost" size="sm">View</Button>
-                </Link>
-                <Button variant="ghost" size="sm">Edit</Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -395,4 +414,4 @@ export const DashboardPage = () => {
       <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
-}
+ }
