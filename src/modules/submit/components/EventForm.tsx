@@ -16,6 +16,7 @@ import { Upload, X } from 'lucide-react';
 const EventForm = () => {
   const { submitEvent, isSubmitting, error, success, resetState } = useSubmit();
   const [imagePreview, setImagePreview] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   
   const {
     register,
@@ -23,6 +24,7 @@ const EventForm = () => {
     control,
     reset,
     watch,
+    setValue,
     formState: { errors, isValid },
   } = useForm<IEventInput>({
     mode: 'onChange',
@@ -39,6 +41,7 @@ const EventForm = () => {
       toast.success('Event submitted successfully!');
       reset();
       setImagePreview([]);
+      setSelectedFiles([]);
       setTimeout(() => {
         router.push('/dashboard');
       }, 2000);
@@ -53,13 +56,24 @@ const EventForm = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
+    if (files && files.length > 0) {
+      const filesArray = Array.from(files);
+      
+      // Limit to 5 images
+      if (filesArray.length > 5) {
+        toast.error('Maximum 5 images allowed');
+        return;
+      }
+
+      setSelectedFiles(filesArray);
+
+      // Create previews
       const previews: string[] = [];
-      Array.from(files).forEach((file) => {
+      filesArray.forEach((file) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           previews.push(reader.result as string);
-          if (previews.length === files.length) {
+          if (previews.length === filesArray.length) {
             setImagePreview(previews);
           }
         };
@@ -70,26 +84,28 @@ const EventForm = () => {
 
   const removeImage = (index: number) => {
     setImagePreview(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const onSubmit = (data: IEventInput) => {
     const formData = new FormData();
     
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === 'images') {
-        if (value) {
-          Array.from(value as FileList).forEach((file) => {
-            formData.append('images', file);
-          });
-        }
-      } else if (value !== undefined && value !== null) {
-        if (key === 'date') {
-          formData.append(key, new Date(value).toISOString());
-        } else {
-          formData.append(key, String(value));
-        }
-      }
+    // Append all form fields
+    formData.append('title', data.title);
+    if (data.description) formData.append('description', data.description);
+    formData.append('date', new Date(data.date).toISOString());
+    formData.append('location', data.location);
+    formData.append('category', data.category);
+    formData.append('isFree', String(data.isFree));
+    formData.append('eventType', data.eventType || 'in-person');
+    if (data.link) formData.append('link', data.link);
+
+    // Append images - CRITICAL: Must be named 'images' to match backend
+    selectedFiles.forEach((file) => {
+      formData.append('images', file);
     });
+
+    console.log('Submitting with files:', selectedFiles.length);
     
     submitEvent(formData);
   };
@@ -301,16 +317,16 @@ const EventForm = () => {
               Click to upload <span className="text-muted-foreground">or drag and drop</span>
             </p>
             <p className="text-xs text-muted-foreground">
-              PNG, JPG or GIF (MAX. 5MB each)
+              PNG, JPG or GIF (MAX. 5MB each, up to 5 images)
             </p>
           </label>
           <input
             id="images"
             type="file"
-            {...register('images')}
             onChange={handleImageChange}
             multiple
             accept="image/*"
+            max={5}
             className="hidden"
           />
           
