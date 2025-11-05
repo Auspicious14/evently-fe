@@ -4,6 +4,7 @@ import { Menu, X, Calendar } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import Image from "next/image";
+import { Notifications } from "@/modules/notifications/components/Notifications";
 
 const Header = () => {
   const { user, logout, loginWithTwitter, loading } = useAuth();
@@ -40,6 +41,7 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <>
+              <Notifications />
               <Link href="/dashboard">
                 <Button variant="ghost" className="gap-2">
                   <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold">

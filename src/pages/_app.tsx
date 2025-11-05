@@ -7,6 +7,7 @@ import { SubmitProvider } from '@/modules/submit/context';
 import { DashboardProvider } from '@/modules/dashboard/context';
 import { AdminProvider } from '@/modules/admin/context';
 import { ToastProvider } from '@/components/ToastProvider';
+import { NotificationsProvider } from '@/modules/notifications/context';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -15,8 +16,10 @@ export default function App({ Component, pageProps }: AppProps) {
         <SubmitProvider>
           <DashboardProvider>
             <AdminProvider>
-              <ToastProvider />
-              <Component {...pageProps} />
+              <NotificationsProvider>
+                <ToastProvider />
+                <Component {...pageProps} />
+              </NotificationsProvider>
             </AdminProvider>
           </DashboardProvider>
         </SubmitProvider>

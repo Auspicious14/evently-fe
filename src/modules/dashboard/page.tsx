@@ -381,16 +381,79 @@ const MyEventsTab = () => {
   );
 };
 
+const UpvotedEventsTab = () => {
+  const { upvotedEvents, loading } = useDashboard();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Upvoted Events</h1>
+      {upvotedEvents.length === 0 ? (
+        <Card className="p-12">
+          <p className="text-center text-muted-foreground">You haven't upvoted any events yet.</p>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {upvotedEvents.map((event) => (
+            <Card key={event.eventId} className="p-6">
+               <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="font-bold text-lg">{event.title}</h3>
+                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                      event.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                      event.status === 'approved' ? 'bg-green-100 text-green-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {event.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="text-sm text-muted-foreground mb-2">
+                    {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {event.location}
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span><Heart className="inline h-4 w-4 mr-1"/>{event.upvotes} Upvotes</span>
+                    <span><TrendingUp className="inline h-4 w-4 mr-1"/>{event.views} Views</span>
+                  </div>
+                </div>
+                <div className="flex gap-2 ml-4">
+                  <Link href={`/events/${event.eventId}`}>
+                    <Button variant="ghost" size="sm">View</Button>
+                  </Link>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const DashboardPage = () => {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const { fetchUpvotedEvents } = useDashboard();
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (activeTab === 'upvoted') {
+      fetchUpvotedEvents();
+    }
+  }, [activeTab, fetchUpvotedEvents]);
 
   if (loading || !user) {
     return (
@@ -407,7 +470,7 @@ export const DashboardPage = () => {
       <main className="flex-1 p-6 md:p-8 pb-24 md:pb-8">
         {activeTab === 'dashboard' && <DashboardTab />}
         {activeTab === 'myevents' && <MyEventsTab />}
-        {activeTab === 'upvoted' && <div>Upvoted Events Coming Soon</div>}
+        {activeTab === 'upvoted' && <UpvotedEventsTab />}
         {activeTab === 'settings' && <div>Settings Coming Soon</div>}
       </main>
 
