@@ -1,9 +1,9 @@
-// components/Header.tsx
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Menu, X, Calendar } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
+import Image from "next/image";
 
 const Header = () => {
   const { user, logout, loginWithTwitter, loading } = useAuth();
@@ -12,15 +12,13 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <Calendar className="h-5 w-5 text-white" />
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">  
+            <Image src="/EventNaija-logo.png" alt="logo" width={100} height={100} />
           </div>
           <span className="font-bold text-xl">EventNaija</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
           <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
             Home
@@ -39,7 +37,6 @@ const Header = () => {
           </Link>
         </nav>
 
-        {/* Auth Buttons */}
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <>
@@ -71,7 +68,6 @@ const Header = () => {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="md:hidden p-2"
@@ -80,7 +76,6 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-white">
           <nav className="container mx-auto px-4 py-4 space-y-3">
