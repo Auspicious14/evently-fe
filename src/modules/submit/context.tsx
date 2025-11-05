@@ -26,9 +26,10 @@ export const SubmitProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const response = await apiClient.post("/events", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        //headers: {
+         // "Content-Type": "multipart/form-data",
+        //},
+        transformRequest: [(data) => data],
       });
 
       if (response.data && response.data.success) {
