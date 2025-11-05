@@ -6,7 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Calendar, MapPin, ExternalLink, ArrowLeft, ArrowUp, Share2, Flag } from 'lucide-react';
+import { Calendar, MapPin, ExternalLink, ArrowLeft, ArrowUp, Share2, Flag, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { IEvent } from '@/modules/events/model';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -25,6 +25,175 @@ const getCategoryGradient = (category: string) => {
     Virtual: 'from-indigo-600 to-blue-500',
   };
   return gradients[category] || 'from-gray-400 to-gray-600';
+};
+
+const ImageGallery = ({ images, category }: { images: string[]; category: string }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const hasImages = images && images.length > 0;
+
+  const nextImage = () => {
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setShowLightbox(true);
+  };
+
+  const nextLightboxImage = () => {
+    setLightboxIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevLightboxImage = () => {
+    setLightboxIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  if (!hasImages) {
+    return (
+      <div className={`bg-gradient-to-br ${getCategoryGradient(category)} h-64 md:h-80 relative`}>
+        <div className="absolute inset-0 bg-black/30"></div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Main Image Gallery */}
+      <div className="relative h-64 md:h-80 bg-gray-900 group">
+        <img
+          src={images[currentIndex]}
+          alt={`Event image ${currentIndex + 1}`}
+          className="w-full h-full object-cover cursor-pointer"
+          onClick={() => openLightbox(currentIndex)}
+        />
+        
+        {/* Overlay gradient for better text visibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
+
+        {/* Navigation arrows - only show if multiple images */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prevImage}
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+              aria-label="Next image"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+
+            {/* Dot indicators */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+              {images.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === currentIndex
+                      ? 'bg-white w-8'
+                      : 'bg-white/50 hover:bg-white/75'
+                  }`}
+                  aria-label={`Go to image ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Image counter */}
+        <div className="absolute top-4 right-4 px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded-full text-white text-sm font-medium">
+          {currentIndex + 1} / {images.length}
+        </div>
+      </div>
+
+      {/* Thumbnail strip - only show if more than 1 image */}
+      {images.length > 1 && (
+        <div className="bg-gray-50 border-b">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {images.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                    index === currentIndex
+                      ? 'border-primary scale-105'
+                      : 'border-transparent hover:border-gray-300'
+                  }`}
+                >
+                  <img
+                    src={img}
+                    alt={`Thumbnail ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  {index !== currentIndex && (
+                    <div className="absolute inset-0 bg-black/20"></div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {showLightbox && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
+          <button
+            onClick={() => setShowLightbox(false)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+            aria-label="Close lightbox"
+          >
+            <X className="h-6 w-6" />
+          </button>
+
+          <div className="relative w-full h-full flex items-center justify-center p-4">
+            <img
+              src={images[lightboxIndex]}
+              alt={`Event image ${lightboxIndex + 1}`}
+              className="max-w-full max-h-full object-contain"
+            />
+
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={prevLightboxImage}
+                  className="absolute left-4 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="h-8 w-8" />
+                </button>
+                <button
+                  onClick={nextLightboxImage}
+                  className="absolute right-4 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="h-8 w-8" />
+                </button>
+
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/50 backdrop-blur-sm rounded-full text-white text-sm font-medium">
+                  {lightboxIndex + 1} / {images.length}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
 };
 
 export const EventDetailPage = ({ _id }: { _id: string }) => {
@@ -66,23 +235,18 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
       setUpvoting(true);
       
       if (hasUpvoted) {
-        // Remove upvote
         await removeUpvoteEvent(event._id);
         toast.success('Upvote removed');
         setHasUpvoted(false);
         setEvent(prev => prev ? { ...prev, upvotes: Math.max(0, (prev.upvotes || 0) - 1) } : null);
       } else {
-        // Add upvote
         await upvoteEvent(event._id);
         toast.success('Event upvoted!');
         setHasUpvoted(true);
         setEvent(prev => prev ? { ...prev, upvotes: (prev.upvotes || 0) + 1 } : null);
       }
     } catch (error: any) {
-      // Revert optimistic update on error
-      if (!error.message?.includes('already upvoted')) {
-        // Error already shown by interceptor for most cases
-      }
+      // Error handled by interceptor
     } finally {
       setUpvoting(false);
     }
@@ -167,12 +331,14 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
           </div>
         </div>
 
-        {/* Hero Section */}
-        <div className={`bg-gradient-to-br ${getCategoryGradient(event.category)} h-64 md:h-80 relative`}>
-          <div className="absolute inset-0 bg-black/30"></div>
-          <div className="container mx-auto px-4 h-full flex items-end pb-6 relative z-10">
+        {/* Image Gallery / Hero Section */}
+        <ImageGallery images={event.imageUrls || []} category={event.category} />
+
+        {/* Category & Free Badge Overlay */}
+        <div className="bg-white border-b">
+          <div className="container mx-auto px-4 py-3">
             <div className="flex gap-3">
-              <span className="px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white">
+              <span className="px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
                 {event.category}
               </span>
               {event.isFree && (
