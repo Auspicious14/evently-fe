@@ -146,14 +146,6 @@ const DashboardTab = () => {
   const { user } = useAuth();
   const { overview, loading } = useDashboard();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   const { stats, recentActivity, topPerformingEvents, categoryBreakdown } = overview ?? {};
 
   const getActivityMessage = (activity: any) => {
