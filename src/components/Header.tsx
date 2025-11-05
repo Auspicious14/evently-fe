@@ -13,10 +13,10 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-white">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">  
+          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">  
             <Image src="/EventNaija-logo.png" alt="logo" width={100} height={100} />
           </div>
-          <span className="font-bold text-xl">EventNaija</span>
+          { /* <span className="font-bold text-xl">EventNaija</span> */}
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
