@@ -5,16 +5,10 @@ import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import Image from "next/image";
 import { Notifications } from "@/modules/notifications/components/Notifications";
-import { useRouter } from "next/router";
 
 const Header = () => {
   const { user, logout, loginWithTwitter, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const router = useRouter();
-
-  const handleLogout = () => {
-    logout(router);
-  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white">
@@ -56,7 +50,7 @@ const Header = () => {
                   Dashboard
                 </Button>
               </Link>
-              <Button variant="outline" onClick={handleLogout}>
+              <Button variant="outline" onClick={logout}>
                 Logout
               </Button>
             </>
@@ -130,7 +124,7 @@ const Header = () => {
                       Dashboard
                     </Button>
                   </Link>
-                  <Button variant="outline" onClick={handleLogout} className="w-full">
+                  <Button variant="outline" onClick={logout} className="w-full">
                     Logout
                   </Button>
                 </>
