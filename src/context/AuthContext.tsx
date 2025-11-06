@@ -19,6 +19,8 @@ interface IUser {
   email: string
 }
 
+import { NextRouter } from "next/router";
+
 interface IAuthContext {
   user: IUser | null;
   loading: boolean;
@@ -26,7 +28,7 @@ interface IAuthContext {
   login: (payload: { username: string; pass: string }) => Promise<void>;
   register: (payload: ISignup) => Promise<void>;
   handleAuthentication: (token: string) => void;
-  logout: () => void;
+  logout: (router: NextRouter) => void;
 }
 
 const AuthContext = createContext<IAuthContext | null>(null);
@@ -108,10 +110,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => {
+  const logout = (router: NextRouter) => {
     localStorage.removeItem("authToken");
     delete apiClient.defaults.headers.common["Authorization"];
     setUser(null);
+    router.push("/");
   };
 
   return (
