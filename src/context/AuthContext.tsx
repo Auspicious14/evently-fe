@@ -11,6 +11,7 @@ import { apiClient } from "@/lib/api";
 import { jwtDecode } from "jwt-decode";
 import { ISignup } from "@/modules/auth/model";
 import { toast } from "sonner";
+import { useRouter } from "next/router";
 
 interface IUser {
   id: string;
@@ -34,6 +35,7 @@ const AuthContext = createContext<IAuthContext | null>(null);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -112,6 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("authToken");
     delete apiClient.defaults.headers.common["Authorization"];
     setUser(null);
+    router.push("/");
   };
 
   return (

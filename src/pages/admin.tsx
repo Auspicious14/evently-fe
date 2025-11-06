@@ -1,8 +1,11 @@
 import { AdminDashboard } from "@/modules/admin/page"
+import AuthGuard from "@/components/AuthGuard"
 
 const Admin = () => {
   return (
-    <AdminDashboard />
+    <AuthGuard>
+      <AdminDashboard />
+    </AuthGuard>
   )
 }
 
