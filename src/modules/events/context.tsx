@@ -38,8 +38,14 @@ interface IEventsContext {
 
 const EventsContext = createContext<IEventsContext | null>(null);
 
-export const EventsProvider = ({ children }: { children: ReactNode }) => {
-  const [events, setEvents] = useState<IEvent[]>([]);
+export const EventsProvider = ({
+  children,
+  initialEvents = [],
+}: {
+  children: ReactNode;
+  initialEvents?: IEvent[];
+}) => {
+  const [events, setEvents] = useState<IEvent[]>(initialEvents);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<IEventFilters>({
@@ -92,9 +98,11 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   );
 
   useEffect(() => {
-    fetchEvents(filters, 0);
+    if (initialEvents.length === 0) {
+      fetchEvents(filters, 0);
+    }
     setSkip(0);
-  }, [filters, fetchEvents]);
+  }, [filters, fetchEvents, initialEvents]);
 
   const handleSetFilters = useCallback(
     (newFilters: Partial<IEventFilters>) => {
