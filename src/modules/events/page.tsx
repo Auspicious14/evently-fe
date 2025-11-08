@@ -214,7 +214,7 @@ export const EventsPage = () => {
                     className={`relative h-48 ${
                       hasImage ? '' : getCategoryGradient(event.category)
                     } flex items-end p-4`}
-                    style={hasImage ? getHeaderStyle(event.imageUrls[0] as string) : {}}
+                    style={hasImage && event?.imageUrls ? getHeaderStyle(event.imageUrls[0]) : {}}
                   >
                     {hasImage && <div className="absolute inset-0 bg-black/40" />}
 
