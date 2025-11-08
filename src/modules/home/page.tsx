@@ -28,7 +28,7 @@ export const LandingPage = () => {
     fetchEvents();
   }, []);
 
-  
+  console.log('events from homepage', events)
   const filteredEvents = (
     activeTab === 'All'
       ? events
