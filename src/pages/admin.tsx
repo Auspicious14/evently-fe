@@ -1,10 +1,13 @@
 import { AdminDashboard } from "@/modules/admin/page"
 import AuthGuard from "@/components/AuthGuard"
+import { AdminProvider } from "@/modules/admin/context"
 
 const Admin = () => {
   return (
     <AuthGuard>
-      <AdminDashboard />
+      <AdminProvider>
+        <AdminDashboard />
+      </AdminProvider>
     </AuthGuard>
   )
 }

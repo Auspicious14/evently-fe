@@ -1,5 +1,6 @@
 import { EventDetailPage } from "@/modules/events/detail";
 import { useRouter } from "next/router";
+import { EventsProvider } from "@/modules/events/context";
 
 const EventDetail = () => {
   const router = useRouter();
@@ -9,7 +10,11 @@ const EventDetail = () => {
     return null;
   }
 
-  return <EventDetailPage _id={_id as string} />;
+  return (
+    <EventsProvider>
+      <EventDetailPage _id={_id as string} />
+    </EventsProvider>
+  );
 };
 
 export default EventDetail;
