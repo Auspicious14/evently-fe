@@ -3,9 +3,7 @@ import { EventsProvider } from "@/modules/events/context"
 
 const Events = () => {
   return (
-    <EventsProvider>
       <EventsPage />
-    </EventsProvider>
   )
 }
 
