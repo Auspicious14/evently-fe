@@ -6,7 +6,6 @@ import React, {
   useState,
   useCallback,
   ReactNode,
-  useEffect,
 } from "react";
 import { IEvent, Category } from "./model";
 import { apiClient } from "@/lib/api";
@@ -39,13 +38,9 @@ interface IEventsContext {
 
 const EventsContext = createContext<IEventsContext | null>(null);
 
-export const EventsProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}) => {
+export const EventsProvider = ({ children }: { children: ReactNode }) => {
   const [events, setEvents] = useState<IEvent[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<IEventFilters>({
     search: "",
@@ -62,6 +57,7 @@ export const EventsProvider = ({
   const fetchEvents = useCallback(async (append: boolean = false) => {
     setLoading(true);
     setError(null);
+    
     try {
       const currentSkip = append ? skip : 0;
       const apiFilters = {
@@ -74,6 +70,7 @@ export const EventsProvider = ({
         limit,
         skip: currentSkip,
       };
+
       const { data } = await apiClient.get<{
         data: IEvent[];
         total: number;
@@ -81,12 +78,17 @@ export const EventsProvider = ({
 
       setEvents((prev) => (append ? [...prev, ...data.data] : data.data));
       setHasMore(currentSkip + data.data.length < data.total);
-      setSkip(currentSkip + data.data.length);
-    } catch (err) {
+      
+      if (!append) {
+        setSkip(data.data.length);
+      } else {
+        setSkip(currentSkip + data.data.length);
+      }
+    } catch (err: any) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch events.";
+        err?.message || "Failed to fetch events.";
       setError(errorMessage);
-      console.error(err);
+      console.error('Fetch events error:', err);
     } finally {
       setLoading(false);
     }
@@ -104,6 +106,8 @@ export const EventsProvider = ({
 
   const refetchEvents = useCallback(() => {
     setSkip(0);
+    setEvents([]);
+    setHasMore(true);
     fetchEvents(false);
   }, [fetchEvents]);
 
