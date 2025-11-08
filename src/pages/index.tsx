@@ -1,8 +1,11 @@
 import { LandingPage } from "@/modules/home/page";
+import { EventsProvider } from "@/modules/events/context";
 
 const HomePage = () => {
   return (
-    <LandingPage />
+    <EventsProvider>
+      <LandingPage />
+    </EventsProvider>
   );
 };
 

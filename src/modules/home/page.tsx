@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
 import { Search, Upload, Users, Calendar, MapPin, TrendingUp } from 'lucide-react';
 import { useEvents } from '@/modules/events/context';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IEvent } from '../events/model';
 
 const getCategoryGradient = (category: string) => {
@@ -21,8 +21,12 @@ const getCategoryGradient = (category: string) => {
 };
 
 export const LandingPage = () => {
-  const { events } = useEvents();
+  const { events, fetchEvents, loading } = useEvents();
   const [activeTab, setActiveTab] = useState('All');
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   
   const filteredEvents = (
