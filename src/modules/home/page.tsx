@@ -26,7 +26,7 @@ export const LandingPage = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, [fetchEvents]);
+  }, []);
 
   
   const filteredEvents = (
