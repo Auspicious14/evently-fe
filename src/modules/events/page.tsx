@@ -48,6 +48,7 @@ export const EventsPage = () => {
     hasMore,
     filters,
     setFilters,
+    fetchEvents,
     upvoteEvent,
     removeUpvoteEvent,
   } = useEvents();
@@ -59,11 +60,14 @@ export const EventsPage = () => {
   const [shareModalOpen, setShareModalOpen] = useState<{ show: boolean; _id?: string }>({
     show: false,
   });
+  const [hasFetched, setHasFetched] = useState(false);
 
-  const currentEvent = events.find(e => e._id === shareModalOpen._id);
-  const eventUrl = currentEvent
-    ? `${window.location.origin}/events/${currentEvent._id}`
-    : '';
+  useEffect(() => {
+    if (!hasFetched && events.length === 0) {
+      fetchEvents();
+      setHasFetched(true);
+    }
+  }, [hasFetched, events.length, fetchEvents]);
 
   useEffect(() => {
     const map: Record<string, boolean> = {};
@@ -72,6 +76,11 @@ export const EventsPage = () => {
     });
     setUpvotedEvents(map);
   }, [events]);
+
+  const currentEvent = events.find(e => e._id === shareModalOpen._id);
+  const eventUrl = currentEvent
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/events/${currentEvent._id}`
+    : '';
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +103,7 @@ export const EventsPage = () => {
         setUpvotedEvents(prev => ({ ...prev, [eventId]: true }));
       }
     } catch (error: any) {
-      toast.error('Something went wrong');
+    
     } finally {
       setUpvotingStates(prev => ({ ...prev, [eventId]: false }));
     }
@@ -105,7 +114,7 @@ export const EventsPage = () => {
       <Header />
 
       <main className="flex-grow bg-gray-50">
-       
+        
         <div className="bg-white border-b sticky top-14 z-40">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-3">
@@ -138,7 +147,7 @@ export const EventsPage = () => {
                   onChange={(e) => setFilters({ category: e.target.value as Category | '' })}
                   value={filters.category || ''}
                 >
-                  <option value="">Sort by: Date</option>
+                  <option value="">All Categories</option>
                   {Object.values(Category).map((cat) => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
@@ -146,7 +155,7 @@ export const EventsPage = () => {
               </div>
             </div>
 
-
+            {/* Mobile Filters */}
             {showFilters && (
               <div className="mt-4 p-4 bg-gray-50 rounded-lg md:hidden">
                 <select
@@ -164,6 +173,7 @@ export const EventsPage = () => {
           </div>
         </div>
 
+        {/* Events Grid */}
         <div className="container mx-auto px-4 py-8">
           {loading && events.length === 0 && (
             <div className="text-center py-12">
@@ -175,6 +185,13 @@ export const EventsPage = () => {
           {error && (
             <div className="text-center py-12">
               <p className="text-red-500">{error}</p>
+              <Button 
+                onClick={() => fetchEvents()} 
+                className="mt-4"
+                variant="outline"
+              >
+                Try Again
+              </Button>
             </div>
           )}
 
@@ -188,20 +205,20 @@ export const EventsPage = () => {
             {events.map((event) => {
               const isUpvoted = upvotedEvents[event._id] ?? event.hasUpvoted ?? false;
               const isUpvoting = upvotingStates[event._id] || false;
-              const hasImage = !!event.imageUrls?.[0];
+              const hasImage = event.imageUrls && event.imageUrls.length > 0;
 
               return (
                 <Card key={event._id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  
+                  {/* Header Image or Gradient */}
                   <div
                     className={`relative h-48 ${
                       hasImage ? '' : getCategoryGradient(event.category)
                     } flex items-end p-4`}
-                    style={getHeaderStyle(event.imageUrls?.[0])}
+                    style={hasImage ? getHeaderStyle(event.imageUrls[0]) : {}}
                   >
                     {hasImage && <div className="absolute inset-0 bg-black/40" />}
 
-                    <div className="relative flex gap-2">
+                    <div className="relative flex gap-2 z-10">
                       <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium text-white">
                         {event.category}
                       </span>
@@ -212,7 +229,8 @@ export const EventsPage = () => {
                       )}
                     </div>
                   </div>
-                  
+
+                  {/* Content */}
                   <div className="p-4">
                     <h3 className="font-bold text-lg mb-2 line-clamp-2 hover:text-primary">
                       <Link href={`/events/${event._id}`}>{event.title}</Link>
@@ -283,7 +301,7 @@ export const EventsPage = () => {
             })}
           </div>
 
-          {!loading && hasMore && (
+          {!loading && hasMore && events.length > 0 && (
             <div className="text-center mt-8">
               <Button
                 onClick={loadMore}
@@ -291,7 +309,7 @@ export const EventsPage = () => {
                 size="lg"
                 className="bg-blue-50 text-blue-600 hover:bg-blue-100"
               >
-                Load More
+                {loading ? 'Loading...' : 'Load More'}
               </Button>
             </div>
           )}
