@@ -5,9 +5,9 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import Link from "next/link";
-import { Twitter, Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner"
-
+import { Eye, EyeOff, Twitter } from "lucide-react";
+import { toast } from "sonner";
+import Image from "next/image";
 
 export const SignupPage = () => {
   const [username, setUsername] = useState("");
@@ -26,7 +26,7 @@ export const SignupPage = () => {
       return;
     }
     if (!agreeToTerms) {
-     toast.error("Please agree to Terms of Service and Privacy Policy");
+      toast.error("Please agree to Terms of Service and Privacy Policy");
       return;
     }
     try {
@@ -39,32 +39,24 @@ export const SignupPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4">
-            <svg
-              className="w-10 h-10 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold">EventNaija</h1>
+          <Image
+            src="/EventNaija-logo.png"
+            alt="EventNaija"
+            width={120}
+            height={120}
+            className="mx-auto"
+          />
         </div>
 
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-sm border p-8">
-          <h2 className="text-2xl font-bold text-center mb-2">Join EventNaija</h2>
+          <h2 className="text-2xl font-bold text-center mb-2">
+            Join EventNaija
+          </h2>
           <p className="text-center text-muted-foreground mb-6">
             Join thousands of tech enthusiasts
           </p>
 
-          {/* Twitter Signup */}
           <Button
             onClick={loginWithTwitter}
             disabled={loading}
@@ -88,7 +80,10 @@ export const SignupPage = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium mb-2"
+              >
                 Username
               </label>
               <Input
@@ -118,7 +113,10 @@ export const SignupPage = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -136,13 +134,20 @@ export const SignupPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium mb-2"
+              >
                 Confirm Password
               </label>
               <div className="relative">
@@ -160,7 +165,11 @@ export const SignupPage = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -173,7 +182,10 @@ export const SignupPage = () => {
                 onChange={(e) => setAgreeToTerms(e.target.checked)}
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
-              <label htmlFor="terms" className="ml-2 text-sm text-muted-foreground">
+              <label
+                htmlFor="terms"
+                className="ml-2 text-sm text-muted-foreground"
+              >
                 I agree to the{" "}
                 <Link href="/terms" className="text-primary hover:underline">
                   Terms of Service
@@ -198,7 +210,10 @@ export const SignupPage = () => {
           {/* Login Link */}
           <p className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{" "}
-            <Link href="/login" className="text-primary font-medium hover:underline">
+            <Link
+              href="/login"
+              className="text-primary font-medium hover:underline"
+            >
               Login
             </Link>
           </p>
@@ -206,4 +221,4 @@ export const SignupPage = () => {
       </div>
     </div>
   );
-}
+};

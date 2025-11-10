@@ -26,32 +26,22 @@ export const LoginPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4">
-            <svg
-              className="w-10 h-10 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold">EventNaija</h1>
+          <Image
+            src="/EventNaija-logo.png"
+            alt="EventNaija"
+            width={120}
+            height={120}
+            className="mx-auto"
+          />
         </div>
 
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-sm border p-8">
           <h2 className="text-2xl font-bold text-center mb-2">Welcome Back!</h2>
           <p className="text-center text-muted-foreground mb-6">
             Sign in to continue to your account
           </p>
 
-          {/* Twitter Login */}
           <Button
             onClick={loginWithTwitter}
             disabled={loading}
@@ -75,10 +65,7 @@ export const LoginPage = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium mb-2"
-              >
+              <label htmlFor="email" className="block text-sm font-medium mb-2">
                 Email
               </label>
               <Input
@@ -145,7 +132,10 @@ export const LoginPage = () => {
           {/* Sign Up Link */}
           <p className="text-center text-sm text-muted-foreground mt-6">
             Don't have an account?{" "}
-            <Link href="/signup" className="text-primary font-medium hover:underline">
+            <Link
+              href="/signup"
+              className="text-primary font-medium hover:underline"
+            >
               Sign Up
             </Link>
           </p>
@@ -153,4 +143,4 @@ export const LoginPage = () => {
       </div>
     </div>
   );
-}
+};
