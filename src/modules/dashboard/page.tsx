@@ -35,7 +35,7 @@ const Sidebar = ({ activeTab, setActiveTab }: { activeTab: string; setActiveTab:
           </div>
           <div>
             <div className="font-semibold">{user?.username}</div>
-            <div className="text-xs text-muted-foreground">{user?.email}</div>
+            {user?.email && <div className="text-xs text-muted-foreground">{user?.email}</div>}
           </div>
         </div>
       </div>

@@ -9,7 +9,7 @@ import Image from "next/image";
 import { Twitter, Eye, EyeOff } from "lucide-react";
 
 export const LoginPage = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const { login, loginWithTwitter, loading } = useAuth();
@@ -17,7 +17,7 @@ export const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login({ username: email, pass: password });
+      await login({ username, pass: password });
     } catch (err) {
       console.error(err);
     }
@@ -65,15 +65,15 @@ export const LoginPage = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-2">
-                Email
+              <label htmlFor="username" className="block text-sm font-medium mb-2">
+                Username
               </label>
               <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
                 className="h-12"
               />

@@ -99,15 +99,14 @@ export const SignupPage = () => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-2">
-                Email Address
+                Email Address (Optional)
               </label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email (optional)"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
                 className="h-12"
               />
             </div>
