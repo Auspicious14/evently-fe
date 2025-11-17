@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
 import { Search, Upload, Users, Calendar, MapPin, TrendingUp } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 import { useEvents } from '@/modules/events/context';
 import { useState, useEffect } from 'react';
 import { IEvent } from '../events/model';
@@ -127,7 +128,7 @@ export const LandingPage = () => {
                 <Card key={event._id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className={`h-32 ${getCategoryGradient(event.category)}`}></div>
                   <div className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded">
                         {event.category}
                       </span>
@@ -136,6 +137,21 @@ export const LandingPage = () => {
                           FREE
                         </span>
                       )}
+                      {/* Event Status Badge */}
+                      <Badge 
+                        variant={
+                          event.eventStatus === 'upcoming' ? 'default' :
+                          event.eventStatus === 'ongoing' ? 'secondary' :
+                          'outline'
+                        }
+                        className={
+                          event.eventStatus === 'past' ? 'bg-gray-100 text-gray-600 border-gray-300 text-xs' : 'text-xs'
+                        }
+                      >
+                        {event.eventStatus === 'upcoming' ? 'Upcoming' :
+                         event.eventStatus === 'ongoing' ? 'Ongoing' :
+                         event.pastEventLabel || 'Past'}
+                      </Badge>
                     </div>
                     <h3 className="font-bold mb-2 line-clamp-2">{event.title}</h3>
                     <div className="text-xs text-muted-foreground space-y-1">

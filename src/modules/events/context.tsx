@@ -18,6 +18,7 @@ interface IEventFilters {
   dateFrom: string;
   dateTo: string;
   status: string;
+  eventStatus: 'upcoming' | 'past' | 'ongoing' | '';
 }
 
 interface IEventsContext {
@@ -34,6 +35,9 @@ interface IEventsContext {
   upvoteEvent: (id: string) => Promise<void>;
   removeUpvoteEvent: (id: string) => Promise<void>;
   flagEvent: (id: string) => Promise<void>;
+  fetchUpcomingEvents: () => void;
+  fetchPastEvents: () => void;
+  fetchOngoingEvents: () => void;
 }
 
 const EventsContext = createContext<IEventsContext | null>(null);
@@ -49,6 +53,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     dateFrom: "",
     dateTo: "",
     status: "",
+    eventStatus: "",
   });
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -67,6 +72,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
         ...(filters.dateFrom && { dateFrom: filters.dateFrom }),
         ...(filters.dateTo && { dateTo: filters.dateTo }),
         ...(filters.status && { status: filters.status }),
+        ...(filters.eventStatus && { eventStatus: filters.eventStatus }),
         limit,
         skip: currentSkip,
       };
@@ -156,6 +162,72 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const fetchUpcomingEvents = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data } = await apiClient.get<{
+        data: IEvent[];
+        total: number;
+      }>("/events/upcoming", { params: { limit: 20, skip: 0 } });
+
+      setEvents(data.data);
+      setHasMore(data.data.length < data.total);
+      setSkip(data.data.length);
+    } catch (err: any) {
+      const errorMessage = err?.message || "Failed to fetch upcoming events.";
+      setError(errorMessage);
+      console.error('Fetch upcoming events error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchPastEvents = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data } = await apiClient.get<{
+        data: IEvent[];
+        total: number;
+      }>("/events/past", { params: { limit: 20, skip: 0 } });
+
+      setEvents(data.data);
+      setHasMore(data.data.length < data.total);
+      setSkip(data.data.length);
+    } catch (err: any) {
+      const errorMessage = err?.message || "Failed to fetch past events.";
+      setError(errorMessage);
+      console.error('Fetch past events error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchOngoingEvents = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data } = await apiClient.get<{
+        data: IEvent[];
+        total: number;
+      }>("/events/ongoing", { params: { limit: 20, skip: 0 } });
+
+      setEvents(data.data);
+      setHasMore(data.data.length < data.total);
+      setSkip(data.data.length);
+    } catch (err: any) {
+      const errorMessage = err?.message || "Failed to fetch ongoing events.";
+      setError(errorMessage);
+      console.error('Fetch ongoing events error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const value = {
     events,
     loading,
@@ -170,6 +242,9 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     upvoteEvent,
     removeUpvoteEvent,
     flagEvent,
+    fetchUpcomingEvents,
+    fetchPastEvents,
+    fetchOngoingEvents,
   };
 
   return (

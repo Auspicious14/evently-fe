@@ -49,6 +49,9 @@ export const EventsPage = () => {
     filters,
     setFilters,
     fetchEvents,
+    fetchUpcomingEvents,
+    fetchPastEvents,
+    fetchOngoingEvents,
     upvoteEvent,
     removeUpvoteEvent,
   } = useEvents();
@@ -61,6 +64,7 @@ export const EventsPage = () => {
     show: false,
   });
   const [hasFetched, setHasFetched] = useState(false);
+  const [eventStatusFilter, setEventStatusFilter] = useState<'all' | 'upcoming' | 'past' | 'ongoing'>('all');
 
   useEffect(() => {
     if (!hasFetched && events.length === 0) {
@@ -68,6 +72,21 @@ export const EventsPage = () => {
       setHasFetched(true);
     }
   }, [hasFetched, events.length, fetchEvents]);
+
+  const handleEventStatusFilter = (status: 'all' | 'upcoming' | 'past' | 'ongoing') => {
+    setEventStatusFilter(status);
+    setFilters({ search: searchTerm, category: filters.category });
+    
+    if (status === 'all') {
+      fetchEvents();
+    } else if (status === 'upcoming') {
+      fetchUpcomingEvents();
+    } else if (status === 'past') {
+      fetchPastEvents();
+    } else if (status === 'ongoing') {
+      fetchOngoingEvents();
+    }
+  };
 
   useEffect(() => {
     const map: Record<string, boolean> = {};
@@ -155,6 +174,30 @@ export const EventsPage = () => {
               </div>
             </div>
 
+            {/* Event Status Tabs */}
+            <div className="mt-4">
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {[
+                  { key: 'all', label: 'All Events' },
+                  { key: 'upcoming', label: 'Upcoming' },
+                  { key: 'ongoing', label: 'Ongoing' },
+                  { key: 'past', label: 'Past' },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => handleEventStatusFilter(tab.key as any)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                      eventStatusFilter === tab.key
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Mobile Filters */}
             {showFilters && (
               <div className="mt-4 p-4 bg-gray-50 rounded-lg md:hidden">
@@ -168,6 +211,27 @@ export const EventsPage = () => {
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
+                {/* Mobile Event Status Filter */}
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {[
+                    { key: 'all', label: 'All' },
+                    { key: 'upcoming', label: 'Upcoming' },
+                    { key: 'ongoing', label: 'Ongoing' },
+                    { key: 'past', label: 'Past' },
+                  ].map((tab) => (
+                    <button
+                      key={tab.key}
+                      onClick={() => handleEventStatusFilter(tab.key as any)}
+                      className={`px-3 py-1 rounded text-xs font-medium transition-colors whitespace-nowrap ${
+                        eventStatusFilter === tab.key
+                          ? 'bg-primary text-white'
+                          : 'bg-white text-gray-700 border'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>

@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { Calendar, MapPin, ExternalLink, ArrowLeft, ArrowUp, Share2, Flag, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { IEvent } from '@/modules/events/model';
 import Link from 'next/link';
@@ -337,7 +338,7 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
         {/* Category & Free Badge Overlay */}
         <div className="bg-white border-b">
           <div className="container mx-auto px-4 py-3">
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <span className="px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
                 {event.category}
               </span>
@@ -346,6 +347,21 @@ export const EventDetailPage = ({ _id }: { _id: string }) => {
                   FREE
                 </span>
               )}
+              {/* Event Status Badge */}
+              <Badge 
+                variant={
+                  event.eventStatus === 'upcoming' ? 'default' :
+                  event.eventStatus === 'ongoing' ? 'secondary' :
+                  'outline'
+                }
+                className={
+                  event.eventStatus === 'past' ? 'bg-gray-100 text-gray-600 border-gray-300' : ''
+                }
+              >
+                {event.eventStatus === 'upcoming' ? 'Upcoming' :
+                 event.eventStatus === 'ongoing' ? 'Ongoing' :
+                 event.pastEventLabel || 'Past'}
+              </Badge>
             </div>
           </div>
         </div>

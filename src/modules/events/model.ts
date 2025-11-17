@@ -21,6 +21,8 @@ export interface IEvent {
   source?: string;
   sourceTweetId?: string;
   status: 'pending' | 'approved' | 'rejected';
+  eventStatus?: 'upcoming' | 'past' | 'ongoing';
+  pastEventLabel?: string;
   createdAt: string;
   imageUrls?: string[];
   upvotedBy?: string[];
