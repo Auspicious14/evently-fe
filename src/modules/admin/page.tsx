@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState, ElementType } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/router';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  TrendingUp, 
+import { useEffect, useMemo, useState, ElementType } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/router";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import {
+  LayoutDashboard,
+  FileText,
+  TrendingUp,
   Settings as SettingsIcon,
   Check,
   X,
@@ -20,25 +20,29 @@ import {
   Users,
   BarChart2,
   ThumbsUp,
-  Flag
-} from 'lucide-react';
-import { useAdmin } from './context';
-import { apiClient } from '@/lib/api';
-import { toast } from 'sonner';
-import { IAdminEvent } from './model';
+  Flag,
+} from "lucide-react";
+import { useAdmin } from "./context";
+import { apiClient } from "@/lib/api";
+import { toast } from "sonner";
+import { IAdminEvent } from "./model";
 
 export const AdminDashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const { stats, events, loading: adminLoading, refetch } = useAdmin();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'events' | 'analytics' | 'settings'>('dashboard');
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<
+    "dashboard" | "events" | "analytics" | "settings"
+  >("dashboard");
+  const [filter, setFilter] = useState<
+    "all" | "pending" | "approved" | "rejected"
+  >("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'admin')) {
-      router.push('/');
+    if (!authLoading && (!user || user.role !== "admin")) {
+      router.push("/");
     }
   }, [user, authLoading, router]);
 
@@ -48,19 +52,21 @@ export const AdminDashboard = () => {
       toast.success(`Event ${status}`);
       refetch();
     } catch (error) {
-      toast.error('Failed to update event status');
+      toast.error("Failed to update event status");
     }
   };
 
   const filteredEvents = useMemo(() => {
-    return events.filter(event => {
-      const statusMatch = filter === 'all' || event.status === filter;
-      const searchMatch = searchTerm === '' || event.title.toLowerCase().includes(searchTerm.toLowerCase());
+    return events.filter((event) => {
+      const statusMatch = filter === "all" || event.status === filter;
+      const searchMatch =
+        searchTerm === "" ||
+        event.title.toLowerCase().includes(searchTerm.toLowerCase());
       return statusMatch && searchMatch;
     });
   }, [events, filter, searchTerm]);
 
-  if (authLoading || adminLoading || !user || user.role !== 'admin') {
+  if (authLoading || adminLoading || !user || user.role !== "admin") {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -68,7 +74,15 @@ export const AdminDashboard = () => {
     );
   }
 
-  const StatCard = ({ title, value, icon: Icon }: { title: string, value: number, icon: ElementType}) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+  }: {
+    title: string;
+    value: number;
+    icon: ElementType;
+  }) => (
     <Card className="p-4 md:p-6">
       <div className="flex items-center gap-4">
         <div className="p-3 bg-primary/10 rounded-lg">
@@ -100,8 +114,18 @@ export const AdminDashboard = () => {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="relative">
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
               </svg>
               {stats && stats.pendingEvents > 0 && (
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
@@ -116,7 +140,11 @@ export const AdminDashboard = () => {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className={`${showMobileMenu ? 'block' : 'hidden'} md:block w-64 bg-white min-h-screen border-r p-6`}>
+        <aside
+          className={`${
+            showMobileMenu ? "block" : "hidden"
+          } md:block w-64 bg-white min-h-screen border-r p-6`}
+        >
           <div className="mb-8">
             <h2 className="text-lg font-bold mb-2">Welcome, Admin!</h2>
             <p className="text-sm text-muted-foreground">Platform overview</p>
@@ -124,9 +152,14 @@ export const AdminDashboard = () => {
 
           <nav className="space-y-1">
             <button
-              onClick={() => { setActiveTab('dashboard'); setShowMobileMenu(false); }}
+              onClick={() => {
+                setActiveTab("dashboard");
+                setShowMobileMenu(false);
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === 'dashboard' ? 'bg-green-50 text-primary font-medium' : 'hover:bg-gray-50'
+                activeTab === "dashboard"
+                  ? "bg-green-50 text-primary font-medium"
+                  : "hover:bg-gray-50"
               }`}
             >
               <LayoutDashboard className="h-5 w-5" />
@@ -134,9 +167,14 @@ export const AdminDashboard = () => {
             </button>
 
             <button
-              onClick={() => { setActiveTab('events'); setShowMobileMenu(false); }}
+              onClick={() => {
+                setActiveTab("events");
+                setShowMobileMenu(false);
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === 'events' ? 'bg-green-50 text-primary font-medium' : 'hover:bg-gray-50'
+                activeTab === "events"
+                  ? "bg-green-50 text-primary font-medium"
+                  : "hover:bg-gray-50"
               }`}
             >
               <FileText className="h-5 w-5" />
@@ -144,9 +182,14 @@ export const AdminDashboard = () => {
             </button>
 
             <button
-              onClick={() => { setActiveTab('analytics'); setShowMobileMenu(false); }}
+              onClick={() => {
+                setActiveTab("analytics");
+                setShowMobileMenu(false);
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === 'analytics' ? 'bg-green-50 text-primary font-medium' : 'hover:bg-gray-50'
+                activeTab === "analytics"
+                  ? "bg-green-50 text-primary font-medium"
+                  : "hover:bg-gray-50"
               }`}
             >
               <TrendingUp className="h-5 w-5" />
@@ -154,9 +197,14 @@ export const AdminDashboard = () => {
             </button>
 
             <button
-              onClick={() => { setActiveTab('settings'); setShowMobileMenu(false); }}
+              onClick={() => {
+                setActiveTab("settings");
+                setShowMobileMenu(false);
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === 'settings' ? 'bg-green-50 text-primary font-medium' : 'hover:bg-gray-50'
+                activeTab === "settings"
+                  ? "bg-green-50 text-primary font-medium"
+                  : "hover:bg-gray-50"
               }`}
             >
               <SettingsIcon className="h-5 w-5" />
@@ -167,46 +215,80 @@ export const AdminDashboard = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-6 md:p-8">
-          {activeTab === 'dashboard' && (
+          {activeTab === "dashboard" && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Platform Overview</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Events" value={stats?.totalEvents ?? 0} icon={FileText} />
-                <StatCard title="Pending Events" value={stats?.pendingEvents ?? 0} icon={FileText} />
-                <StatCard title="Approved Events" value={stats?.approvedEvents ?? 0} icon={Check} />
-                <StatCard title="Rejected Events" value={stats?.rejectedEvents ?? 0} icon={X} />
-                <StatCard title="Total Users" value={stats?.totalUsers ?? 0} icon={Users} />
-                <StatCard title="Total Event Views" value={stats?.totalEventViews ?? 0} icon={BarChart2} />
-                <StatCard title="Total Upvotes" value={stats?.totalUpvotes ?? 0} icon={ThumbsUp} />
-                <StatCard title="Total Flags" value={stats?.totalFlags ?? 0} icon={Flag} />
+                <StatCard
+                  title="Total Events"
+                  value={stats?.totalEvents ?? 0}
+                  icon={FileText}
+                />
+                <StatCard
+                  title="Pending Events"
+                  value={stats?.pendingEvents ?? 0}
+                  icon={FileText}
+                />
+                <StatCard
+                  title="Approved Events"
+                  value={stats?.approvedEvents ?? 0}
+                  icon={Check}
+                />
+                <StatCard
+                  title="Rejected Events"
+                  value={stats?.rejectedEvents ?? 0}
+                  icon={X}
+                />
+                <StatCard
+                  title="Total Users"
+                  value={stats?.totalUsers ?? 0}
+                  icon={Users}
+                />
+                <StatCard
+                  title="Total Event Views"
+                  value={stats?.totalEventViews ?? 0}
+                  icon={BarChart2}
+                />
+                <StatCard
+                  title="Total Upvotes"
+                  value={stats?.totalUpvotes ?? 0}
+                  icon={ThumbsUp}
+                />
+                <StatCard
+                  title="Total Flags"
+                  value={stats?.totalFlags ?? 0}
+                  icon={Flag}
+                />
               </div>
             </div>
           )}
 
-          {activeTab === 'events' && (
+          {activeTab === "events" && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-2xl font-bold">Events Management</h2>
-                  <p className="text-muted-foreground">Review, approve, and manage all event submissions.</p>
+                  <p className="text-muted-foreground">
+                    Review, approve, and manage all event submissions.
+                  </p>
                 </div>
               </div>
 
               {/* Tabs */}
               <div className="flex gap-2 overflow-x-auto pb-2 border-b">
                 {[
-                  { key: 'all', label: 'All' },
-                  { key: 'pending', label: 'Pending Review' },
-                  { key: 'approved', label: 'Approved' },
-                  { key: 'rejected', label: 'Rejected' },
+                  { key: "all", label: "All" },
+                  { key: "pending", label: "Pending Review" },
+                  { key: "approved", label: "Approved" },
+                  { key: "rejected", label: "Rejected" },
                 ].map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => setFilter(tab.key as any)}
                     className={`px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
                       filter === tab.key
-                        ? 'text-primary border-b-2 border-primary'
-                        : 'text-muted-foreground hover:text-foreground'
+                        ? "text-primary border-b-2 border-primary"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {tab.label}
@@ -255,7 +337,10 @@ export const AdminDashboard = () => {
                       {filteredEvents.map((event) => (
                         <tr key={event.eventId} className="hover:bg-gray-50">
                           <td className="px-6 py-4">
-                            <div className="font-medium">{event.title}</div>
+                            <div className="font-medium">{`${event.title.slice(
+                              0,
+                              20
+                            )}...`}</div>
                           </td>
                           <td className="px-6 py-4 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
@@ -274,11 +359,11 @@ export const AdminDashboard = () => {
                           <td className="px-6 py-4">
                             <span
                               className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                event.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-700'
-                                  : event.status === 'approved'
-                                  ? 'bg-green-100 text-green-700'
-                                  : 'bg-red-100 text-red-700'
+                                event.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : event.status === "approved"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-red-100 text-red-700"
                               }`}
                             >
                               {event.status.toUpperCase()}
@@ -286,20 +371,48 @@ export const AdminDashboard = () => {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              {event.status === 'pending' && (
+                              {event.status === "pending" && (
                                 <>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600" onClick={() => handleUpdateStatus(event.eventId, 'approved')}>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-green-600"
+                                    onClick={() =>
+                                      handleUpdateStatus(
+                                        event.eventId,
+                                        "approved"
+                                      )
+                                    }
+                                  >
                                     <Check className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => handleUpdateStatus(event.eventId, 'rejected')}>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-red-600"
+                                    onClick={() =>
+                                      handleUpdateStatus(
+                                        event.eventId,
+                                        "rejected"
+                                      )
+                                    }
+                                  >
                                     <X className="h-4 w-4" />
                                   </Button>
                                 </>
                               )}
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </div>
@@ -313,14 +426,14 @@ export const AdminDashboard = () => {
             </div>
           )}
 
-          {activeTab === 'analytics' && (
+          {activeTab === "analytics" && (
             <div>
               <h2 className="text-2xl font-bold mb-4">Analytics</h2>
               <p className="text-muted-foreground">Analytics coming soon...</p>
             </div>
           )}
 
-          {activeTab === 'settings' && (
+          {activeTab === "settings" && (
             <div>
               <h2 className="text-2xl font-bold mb-4">Settings</h2>
               <p className="text-muted-foreground">Settings coming soon...</p>
@@ -330,4 +443,4 @@ export const AdminDashboard = () => {
       </div>
     </div>
   );
-}
+};
