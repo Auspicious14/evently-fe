@@ -178,7 +178,7 @@ export const AdminDashboard = () => {
               }`}
             >
               <FileText className="h-5 w-5" />
-              Events Management
+              Events
             </button>
 
             <button
