@@ -28,6 +28,7 @@ const AdminEventsPage = () => {
   };
 
   const filteredEvents = useMemo(() => {
+    if (!Array.isArray(events)) return [];
     return events.filter((event) => {
       const statusMatch = filter === "all" || event.status === filter;
       const searchMatch =

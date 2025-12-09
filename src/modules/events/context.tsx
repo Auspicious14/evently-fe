@@ -83,13 +83,14 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
           total: number;
         }>("/events", { params: apiFilters });
 
-        setEvents((prev) => (append ? [...prev, ...data.data] : data.data));
-        setHasMore(currentSkip + data.data.length < data.total);
+        const eventsData = Array.isArray(data.data) ? data.data : [];
+        setEvents((prev) => (append ? [...prev, ...eventsData] : eventsData));
+        setHasMore(currentSkip + eventsData.length < data.total);
 
         if (!append) {
-          setSkip(data.data.length);
+          setSkip(eventsData.length);
         } else {
-          setSkip(currentSkip + data.data.length);
+          setSkip(currentSkip + eventsData.length);
         }
       } catch (err: any) {
         const errorMessage = err?.message || "Failed to fetch events.";
@@ -174,9 +175,10 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
         total: number;
       }>("/events/upcoming", { params: { limit: 10, skip: 0 } });
 
-      setEvents(data.data);
-      setHasMore(data.data.length < data.total);
-      setSkip(data.data.length);
+      const eventsData = Array.isArray(data.data) ? data.data : [];
+      setEvents(eventsData);
+      setHasMore(eventsData.length < data.total);
+      setSkip(eventsData.length);
     } catch (err: any) {
       const errorMessage = err?.message || "Failed to fetch upcoming events.";
       setError(errorMessage);
@@ -196,9 +198,10 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
         total: number;
       }>("/events/past", { params: { limit: 10, skip: 0 } });
 
-      setEvents(data.data);
-      setHasMore(data.data.length < data.total);
-      setSkip(data.data.length);
+      const eventsData = Array.isArray(data.data) ? data.data : [];
+      setEvents(eventsData);
+      setHasMore(eventsData.length < data.total);
+      setSkip(eventsData.length);
     } catch (err: any) {
       const errorMessage = err?.message || "Failed to fetch past events.";
       setError(errorMessage);

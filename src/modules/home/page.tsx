@@ -44,7 +44,7 @@ export const LandingPage = () => {
     fetchEvents();
   }, [fetchEvents]);
 
-  const filteredEvents = events.slice(0, 4);
+  const filteredEvents = Array.isArray(events) ? events.slice(0, 4) : [];
 
   return (
     <div className="flex flex-col min-h-screen">

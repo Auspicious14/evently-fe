@@ -1,17 +1,23 @@
 "use client";
 
-import { useNotifications } from '../context';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Bell } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { formatDistanceToNow } from 'date-fns';
-import Link from 'next/link';
+import { useNotifications } from "../context";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Bell } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 export const Notifications = () => {
   const { notifications, loading, markAsRead } = useNotifications();
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = Array.isArray(notifications)
+    ? notifications.filter((n) => !n.read).length
+    : 0;
 
   return (
     <Popover>
@@ -31,22 +37,32 @@ export const Notifications = () => {
         </div>
         <div className="max-h-96 overflow-y-auto">
           {loading ? (
-            <div className="p-4 text-center text-muted-foreground">Loading...</div>
+            <div className="p-4 text-center text-muted-foreground">
+              Loading...
+            </div>
           ) : notifications.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">No new notifications</div>
+            <div className="p-4 text-center text-muted-foreground">
+              No new notifications
+            </div>
           ) : (
-            notifications.map(notification => (
+            notifications.map((notification) => (
               <div
                 key={notification.id}
                 className={`p-4 border-b last:border-b-0 ${
-                  notification.read ? 'opacity-60' : ''
+                  notification.read ? "opacity-60" : ""
                 }`}
               >
                 <Link href={`/events/${notification.metadata.eventId}`}>
-                  <p className="text-sm mb-1 hover:underline">{notification.message}</p>
+                  <p className="text-sm mb-1 hover:underline">
+                    {notification.message}
+                  </p>
                 </Link>
                 <div className="text-xs text-muted-foreground flex justify-between items-center">
-                  <span>{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</span>
+                  <span>
+                    {formatDistanceToNow(new Date(notification.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
                   {!notification.read && (
                     <Button
                       variant="ghost"
