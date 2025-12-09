@@ -40,7 +40,7 @@ export const Notifications = () => {
             <div className="p-4 text-center text-muted-foreground">
               Loading...
             </div>
-          ) : notifications.length === 0 ? (
+          ) : !Array.isArray(notifications) || notifications.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
               No new notifications
             </div>
