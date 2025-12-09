@@ -18,7 +18,7 @@ interface IEventFilters {
   dateFrom: string;
   dateTo: string;
   status: string;
-  eventStatus: 'upcoming' | 'past' | 'ongoing' | '';
+  eventStatus: "upcoming" | "past" | "ongoing" | "";
 }
 
 interface IEventsContext {
@@ -59,56 +59,55 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   const [hasMore, setHasMore] = useState(true);
   const limit = 10;
 
-  const fetchEvents = useCallback(async (append: boolean = false) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const currentSkip = append ? skip : 0;
-      const apiFilters = {
-        ...(filters.search && { title: filters.search }),
-        ...(filters.location && { location: filters.location }),
-        ...(filters.category && { category: filters.category }),
-        ...(filters.dateFrom && { dateFrom: filters.dateFrom }),
-        ...(filters.dateTo && { dateTo: filters.dateTo }),
-        ...(filters.status && { status: filters.status }),
-        ...(filters.eventStatus && { eventStatus: filters.eventStatus }),
-        limit,
-        skip: currentSkip,
-      };
+  const fetchEvents = useCallback(
+    async (append: boolean = false) => {
+      setLoading(true);
+      setError(null);
 
-      const { data } = await apiClient.get<{
-        data: IEvent[];
-        total: number;
-      }>("/events", { params: apiFilters });
+      try {
+        const currentSkip = append ? skip : 0;
+        const apiFilters = {
+          ...(filters.search && { title: filters.search }),
+          ...(filters.location && { location: filters.location }),
+          ...(filters.category && { category: filters.category }),
+          ...(filters.dateFrom && { dateFrom: filters.dateFrom }),
+          ...(filters.dateTo && { dateTo: filters.dateTo }),
+          ...(filters.status && { status: filters.status }),
+          ...(filters.eventStatus && { eventStatus: filters.eventStatus }),
+          limit,
+          skip: currentSkip,
+        };
 
-      setEvents((prev) => (append ? [...prev, ...data.data] : data.data));
-      setHasMore(currentSkip + data.data.length < data.total);
-      
-      if (!append) {
-        setSkip(data.data.length);
-      } else {
-        setSkip(currentSkip + data.data.length);
+        const { data } = await apiClient.get<{
+          data: IEvent[];
+          total: number;
+        }>("/events", { params: apiFilters });
+
+        setEvents((prev) => (append ? [...prev, ...data.data] : data.data));
+        setHasMore(currentSkip + data.data.length < data.total);
+
+        if (!append) {
+          setSkip(data.data.length);
+        } else {
+          setSkip(currentSkip + data.data.length);
+        }
+      } catch (err: any) {
+        const errorMessage = err?.message || "Failed to fetch events.";
+        setError(errorMessage);
+        console.error("Fetch events error:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      const errorMessage =
-        err?.message || "Failed to fetch events.";
-      setError(errorMessage);
-      console.error('Fetch events error:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, skip, limit]);
-
-  const handleSetFilters = useCallback(
-    (newFilters: Partial<IEventFilters>) => {
-      setFilters(prev => ({ ...prev, ...newFilters }));
-      setSkip(0);
-      setEvents([]);
-      setHasMore(true);
     },
-    []
+    [filters, skip, limit]
   );
+
+  const handleSetFilters = useCallback((newFilters: Partial<IEventFilters>) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+    setSkip(0);
+    setEvents([]);
+    setHasMore(true);
+  }, []);
 
   const refetchEvents = useCallback(() => {
     setSkip(0);
@@ -123,21 +122,24 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [loading, hasMore, fetchEvents]);
 
-  const getEvent = useCallback(async (id: string): Promise<IEvent & { hasUpvoted?: boolean }> => {
-    try {
-      const { data } = await apiClient.get(`/events/${id}`);
-      return data.data ? data.data : data;
-    } catch (error: any) {
-      throw error;
-    }
-  }, []);
+  const getEvent = useCallback(
+    async (id: string): Promise<IEvent & { hasUpvoted?: boolean }> => {
+      try {
+        const { data } = await apiClient.get(`/events/${id}`);
+        return data.data ? data.data : data;
+      } catch (error: any) {
+        throw error;
+      }
+    },
+    []
+  );
 
   const upvoteEvent = useCallback(async (id: string) => {
     try {
       await apiClient.patch(`/events/${id}/upvote`);
     } catch (error: any) {
-      if (error.message?.includes('already upvoted')) {
-        toast.info('You have already upvoted this event');
+      if (error.message?.includes("already upvoted")) {
+        toast.info("You have already upvoted this event");
       }
       throw error;
     }
@@ -147,8 +149,8 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     try {
       await apiClient.delete(`/events/${id}/upvote`);
     } catch (error: any) {
-      if (error.message?.includes('not upvoted')) {
-        toast.info('You have not upvoted this event');
+      if (error.message?.includes("not upvoted")) {
+        toast.info("You have not upvoted this event");
       }
       throw error;
     }
@@ -165,12 +167,12 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   const fetchUpcomingEvents = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data } = await apiClient.get<{
         data: IEvent[];
         total: number;
-      }>("/events/upcoming", { params: { limit: 20, skip: 0 } });
+      }>("/events/upcoming", { params: { limit: 10, skip: 0 } });
 
       setEvents(data.data);
       setHasMore(data.data.length < data.total);
@@ -178,7 +180,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       const errorMessage = err?.message || "Failed to fetch upcoming events.";
       setError(errorMessage);
-      console.error('Fetch upcoming events error:', err);
+      console.error("Fetch upcoming events error:", err);
     } finally {
       setLoading(false);
     }
@@ -187,12 +189,12 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   const fetchPastEvents = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data } = await apiClient.get<{
         data: IEvent[];
         total: number;
-      }>("/events/past", { params: { limit: 20, skip: 0 } });
+      }>("/events/past", { params: { limit: 10, skip: 0 } });
 
       setEvents(data.data);
       setHasMore(data.data.length < data.total);
@@ -200,7 +202,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       const errorMessage = err?.message || "Failed to fetch past events.";
       setError(errorMessage);
-      console.error('Fetch past events error:', err);
+      console.error("Fetch past events error:", err);
     } finally {
       setLoading(false);
     }
@@ -209,12 +211,12 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   const fetchOngoingEvents = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data } = await apiClient.get<{
         data: IEvent[];
         total: number;
-      }>("/events/ongoing", { params: { limit: 20, skip: 0 } });
+      }>("/events/ongoing", { params: { limit: 10, skip: 0 } });
 
       setEvents(data.data);
       setHasMore(data.data.length < data.total);
@@ -222,7 +224,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       const errorMessage = err?.message || "Failed to fetch ongoing events.";
       setError(errorMessage);
-      console.error('Fetch ongoing events error:', err);
+      console.error("Fetch ongoing events error:", err);
     } finally {
       setLoading(false);
     }
