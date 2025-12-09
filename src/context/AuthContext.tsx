@@ -17,7 +17,7 @@ interface IUser {
   id: string;
   username: string;
   role: string;
-  email?: string
+  email?: string;
 }
 
 interface IAuthContext {
@@ -58,8 +58,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await apiClient.post("/auth/login", payload);
       if (response?.data?.success) {
         const token = response.data.token;
-        handleAuthentication(token);
+        const decodedUser = handleAuthentication(token);
         toast.success("Login successful!");
+
+        if (decodedUser && decodedUser.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/dashboard");
+        }
       }
     } catch (error) {
       toast.error("Failed to login. Please try again.");
@@ -74,8 +80,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await apiClient.post("/auth/register", payload);
       if (response?.data?.success) {
         const token = response.data.token;
-        handleAuthentication(token);
+        const decodedUser = handleAuthentication(token);
         toast.success("Signup successful!");
+
+        if (decodedUser && decodedUser.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/dashboard");
+        }
       }
     } catch (error) {
       toast.error("Failed to register. Please try again.");
@@ -104,9 +116,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem("authToken", token);
       apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setUser(decodedUser);
+      return decodedUser;
     } catch (e: any) {
       console.error("Failed to decode token:", e);
-      return e?.message || "Failed to decode token.";
+      return null;
     }
   };
 
