@@ -14,26 +14,46 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-white">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">  
-            <Image src="/EventNaija-logo.png" alt="logo" width={100} height={100} />
+          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+            <Image
+              src="/EventNaija-logo.png"
+              alt="logo"
+              width={100}
+              height={100}
+            />
           </div>
-          { /* <span className="font-bold text-xl">EventNaija</span> */}
+          {/* <span className="font-bold text-xl">EventNaija</span> */}
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             Home
           </Link>
-          <Link href="/events" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/events"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             Discover Events
           </Link>
-          <Link href="/submit" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/submit"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             Submit Event
           </Link>
-          <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/about"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             About
           </Link>
-          <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/contact"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             Contact
           </Link>
         </nav>
@@ -70,12 +90,19 @@ const Header = () => {
           )}
         </div>
 
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2"
-        >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          {user && <Notifications />}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
+        </div>
       </div>
 
       {mobileMenuOpen && (
@@ -119,7 +146,10 @@ const Header = () => {
             <div className="pt-3 border-t space-y-2">
               {user ? (
                 <>
-                  <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     <Button variant="outline" className="w-full">
                       Dashboard
                     </Button>

@@ -52,7 +52,13 @@ export const Notifications = () => {
                   notification.read ? "opacity-60" : ""
                 }`}
               >
-                <Link href={`/events/${notification.metadata.eventId}`}>
+                <Link
+                  href={
+                    notification.eventId
+                      ? `/events/${notification.eventId}`
+                      : "#"
+                  }
+                >
                   <p className="text-sm mb-1 hover:underline">
                     {notification.message}
                   </p>

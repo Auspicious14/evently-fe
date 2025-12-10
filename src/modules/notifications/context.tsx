@@ -43,7 +43,18 @@ export const NotificationsProvider = ({
 
     try {
       const response = await apiClient.get("/notifications");
-      setNotifications(Array.isArray(response.data) ? response.data : []);
+      const data = response.data?.data;
+
+      if (Array.isArray(data)) {
+        setNotifications(
+          data.map((n: any) => ({
+            ...n,
+            id: n._id,
+          }))
+        );
+      } else {
+        setNotifications([]);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch notifications.";
@@ -56,7 +67,7 @@ export const NotificationsProvider = ({
 
   const markAsRead = useCallback(async (id: string) => {
     try {
-      await apiClient.post(`/notifications/${id}/read`);
+      await apiClient.patch(`/notifications/${id}/read`);
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
